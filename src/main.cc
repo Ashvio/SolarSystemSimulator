@@ -40,6 +40,25 @@ const char* floor_fragment_shader =
 #include "shaders/floor.frag"
 ;
 
+const char* sphere_vertex_shader =
+#include "shaders/sphere.vert"
+;
+
+const char* sphere_tcs_shader =
+#include "shaders/sphere.tesc"
+;
+
+const char* sphere_tes_shader =
+#include "shaders/sphere.tese"
+;
+
+const char* sphere_geometry_shader =
+#include "shaders/sphere.geom"
+;
+
+const char* sphere_fragment_shader =
+#include "shaders/sphere.frag"
+;
 
 void ErrorCallback(int error, const char* description) {
 	std::cerr << "GLFW Error: " << description << "\n";
@@ -147,6 +166,9 @@ int main(int argc, char* argv[])
 	auto std_light_data = [&light_position]() -> const void* {
 		return &light_position[0];
 	};
+	auto tess_level_data = [&gui]() -> const void* {
+		return &gui.tess_level;
+	};
 	
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
@@ -154,9 +176,9 @@ int main(int argc, char* argv[])
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
-	//ShaderUniform std_ortho = { "orthomat", matrix_binder, std_ortho_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
-
+	ShaderUniform tess_level_inner = { "tess_level_inner", float_binder, tess_level_data };
+	ShaderUniform tess_level_outer = { "tess_level_outer", float_binder, tess_level_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -167,11 +189,25 @@ int main(int argc, char* argv[])
 	floor_pass_input.assignIndex(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
-			{ vertex_shader, geometry_shader, floor_fragment_shader},
+			{ vertex_shader, geometry_shader, floor_fragment_shader, nullptr, nullptr },
 			{ floor_model, std_view, std_proj, std_light },
 			{ "fragment_color" }
 			);
 
+	// RENDER A SPHERE
+	std::vector<glm::vec4> sphere_vertices;
+	std::vector<glm::uvec3> sphere_faces;
+	create_sphere(sphere_vertices, sphere_faces);
+
+	RenderDataInput sphere_pass_input;
+	sphere_pass_input.assign(0, "vertex_position", sphere_vertices.data(), sphere_vertices.size(), 4, GL_FLOAT);
+	sphere_pass_input.assignIndex(sphere_faces.data(), sphere_faces.size(), 3);
+	RenderPass sphere_pass(-1,
+			sphere_pass_input,
+			{ sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader },
+			{ std_model, std_view, std_proj, tess_level_inner, tess_level_outer },
+			{ "fragment_color" }
+			);
 	// PMD Model render pass
 	// FIXME: initialize the input data at Mesh::loadPmd
 	
@@ -213,6 +249,13 @@ int main(int argc, char* argv[])
 			                              GL_UNSIGNED_INT, 0));
 		}
 
+		sphere_pass.setup();
+		
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+		CHECK_GL_ERROR(glDrawElements(GL_PATCHES, 
+									  sphere_faces.size() * 3,
+									  GL_UNSIGNED_INT, 0));
 	
 		// Poll and swap.
 		glfwPollEvents();
