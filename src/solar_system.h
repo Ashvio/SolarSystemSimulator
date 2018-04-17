@@ -3,6 +3,7 @@
 
 #include "gui.h"
 #include "config.h"
+#include "constants.h"
 #include <vector>
 #include <map>
 #include <glm/glm.hpp>
@@ -26,11 +27,17 @@ private:
     float mass;
     bool is_sun;
     bool is_planet;
+
+    std::vec4 position;
+    std::vec4 velocity;
     GLuint texture;
 }
 
 class SolarSystem {
 public:
+    SolarSystem() {}
+
+    void generateSolPlanets();
     static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary faces);
 private:
     std::vector<PlanetaryObject> planets;
