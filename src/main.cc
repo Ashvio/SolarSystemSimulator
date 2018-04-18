@@ -182,18 +182,6 @@ int main(int argc, char* argv[])
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
-	//ShaderUniform bone_transform {"bone_transform", bone_transform_binder, bone_transform_data};
-	// Floor render pass
-	RenderDataInput floor_pass_input;
-	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
-	floor_pass_input.assignIndex(floor_faces.data(), floor_faces.size(), 3);
-	RenderPass floor_pass(-1,
-			floor_pass_input,
-			{ vertex_shader, geometry_shader, floor_fragment_shader, nullptr, nullptr },
-			{ floor_model, std_view, std_proj, std_light },
-			{ "fragment_color" }
-			);
-
 	// RENDER A SPHERE
 	std::vector<glm::vec4> sphere_vertices;
 	std::vector<glm::uvec3> sphere_faces;
@@ -208,6 +196,20 @@ int main(int argc, char* argv[])
 			{ std_model, std_view, std_proj, tess_level_inner, tess_level_outer },
 			{ "fragment_color" }
 			);
+
+	//ShaderUniform bone_transform {"bone_transform", bone_transform_binder, bone_transform_data};
+	// Floor render pass
+	RenderDataInput floor_pass_input;
+	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
+	floor_pass_input.assignIndex(floor_faces.data(), floor_faces.size(), 3);
+	RenderPass floor_pass(-1,
+			floor_pass_input,
+			{ vertex_shader, geometry_shader, floor_fragment_shader, nullptr, nullptr },
+			{ floor_model, std_view, std_proj, std_light },
+			{ "fragment_color" }
+			);
+
+	
 	// PMD Model render pass
 	// FIXME: initialize the input data at Mesh::loadPmd
 	
@@ -215,7 +217,7 @@ int main(int argc, char* argv[])
 	// FIXME: You won't see the bones until Skeleton::joints were properly
 	//        initialized
 	
-	bool draw_floor = true;
+	bool draw_floor = false;
 
 
 	if (argc >= 3) {
@@ -248,7 +250,7 @@ int main(int argc, char* argv[])
 			                              floor_faces.size() * 3,
 			                              GL_UNSIGNED_INT, 0));
 		}
-
+		
 		sphere_pass.setup();
 		
 		glPatchParameteri(GL_PATCH_VERTICES, 3);

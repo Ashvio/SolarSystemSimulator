@@ -20,11 +20,9 @@ void create_sphere(std::vector<glm::vec4>& sphere_vertices, std::vector<glm::uve
 	sphere_vertices.push_back(glm::vec4(-0.724f, 0.526f, 0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(-0.724f, -0.526f, 0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(0.276f, -0.851f, 0.447f, 1.0f));
-	sphere_vertices.push_back(glm::vec4(0.276f, 0.851f, 0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(0.724f, 0.526f, -0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(-0.276f, 0.851f, -0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(-0.894f, 0.0f, -0.447f, 1.0f));
-	sphere_vertices.push_back(glm::vec4(0.276f, 0.851f, 0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(-0.276f, -0.851f, -0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(0.724f, -0.526f, -0.447f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
