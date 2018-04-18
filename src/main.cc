@@ -5,6 +5,7 @@
 #include "config.h"
 #include "gui.h"
 #include "procedure_geometry.h"
+#include "solar_system.h"
 #include <memory>
 #include <algorithm>
 #include <fstream>
@@ -99,9 +100,10 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
-	
+	// Create solar system here
+	SolarSystem sol = SolarSystem();
+	sol.generateSolPlanets();
 
-	
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
 	MatrixPointers mats; // Define MatrixPointers here for lambda to capture
 	/*
@@ -169,9 +171,6 @@ int main(int argc, char* argv[])
 	auto tess_level_data = [&gui]() -> const void* {
 		return &gui.tess_level;
 	};
-	auto radius_data = [&gui]() -> const void* {
-		return &gui.radius;
-	};
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
@@ -181,24 +180,9 @@ int main(int argc, char* argv[])
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform tess_level_inner = { "tess_level_inner", float_binder, tess_level_data };
 	ShaderUniform tess_level_outer = { "tess_level_outer", float_binder, tess_level_data };
-	ShaderUniform radius = { "radius", float_binder, radius_data };
+	
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
-
-	// RENDER A SPHERE
-	std::vector<glm::vec4> sphere_vertices;
-	std::vector<glm::uvec3> sphere_faces;
-	create_sphere(sphere_vertices, sphere_faces);
-
-	RenderDataInput sphere_pass_input;
-	sphere_pass_input.assign(0, "vertex_position", sphere_vertices.data(), sphere_vertices.size(), 4, GL_FLOAT);
-	sphere_pass_input.assignIndex(sphere_faces.data(), sphere_faces.size(), 3);
-	RenderPass sphere_pass(-1,
-			sphere_pass_input,
-			{ sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader },
-			{ std_model, std_view, std_proj, tess_level_inner, tess_level_outer, radius },
-			{ "fragment_color" }
-			);
 
 	//ShaderUniform bone_transform {"bone_transform", bone_transform_binder, bone_transform_data};
 	// Floor render pass
@@ -253,14 +237,43 @@ int main(int argc, char* argv[])
 			                              floor_faces.size() * 3,
 			                              GL_UNSIGNED_INT, 0));
 		}
-		
-		sphere_pass.setup();
-		
-		glPatchParameteri(GL_PATCH_VERTICES, 3);
 
-		CHECK_GL_ERROR(glDrawElements(GL_PATCHES, 
-									  sphere_faces.size() * 3,
-									  GL_UNSIGNED_INT, 0));
+		// Render solar system
+		if (sol.numPlanets() > 0) {
+			std::vector<glm::vec4> planet_vertices;
+			std::vector<glm::uvec3> planet_faces;
+			create_sphere(planet_vertices, planet_faces);
+			// Iterate through the planets and render each of them
+			for (int i = 0; i < sol.numPlanets(); i++) {
+				PlanetaryObject planet = sol.planets[i];
+				// Get specific radius for planet
+				auto radius_data = [&planet]() -> const void * {
+					return &planet.radius;
+				};
+				// Uniforms
+				ShaderUniform radius = { "radius", float_binder, radius_data };
+
+				// Rendering planet
+				RenderDataInput planet_pass_input;
+				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
+				planet_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
+				RenderPass planet_pass(-1,
+									   planet_pass_input,
+									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
+									   { std_model, std_view, std_proj, tess_level_inner, tess_level_outer, radius },
+									   { "fragment_color" });
+
+				planet_pass.setup();
+
+				glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+				CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
+											  planet_faces.size() * 3,
+											  GL_UNSIGNED_INT, 0));
+			}
+		}
+		
+		
 	
 		// Poll and swap.
 		glfwPollEvents();

@@ -12,6 +12,7 @@
 #include <iostream>
 
 class PlanetaryObject {
+public:
     PlanetaryObject(std::string name, float radius, float mass, bool is_sun, bool is_planet) : name(name), radius(radius), mass(mass), is_sun(is_sun), is_planet(is_planet) {
         
     }
@@ -20,10 +21,13 @@ class PlanetaryObject {
     const float getMass() { return mass; }
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
-
+    void setPosition(glm::vec4 pos) { position = pos; }
+    void setTexture(GLuint text) { texture = text; };
+    
+    float radius;
 private:
     std::string name;
-    float radius;
+    
     float mass;
     bool is_sun;
     bool is_planet;
@@ -38,9 +42,11 @@ public:
     SolarSystem() {}
 
     void generateSolPlanets();
-    static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary_faces);
-private:
+    int numPlanets() { return planets.size(); }
+
     std::vector<PlanetaryObject> planets;
+private:
+    
 
 
 };
