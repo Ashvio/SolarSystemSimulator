@@ -4,6 +4,8 @@
 #include "gui.h"
 #include "config.h"
 #include "constants.h"
+#include "../lib/utgraphicsutil/image.h"
+#include "../lib/utgraphicsutil/jpegio.h"
 #include <vector>
 #include <map>
 #include <glm/glm.hpp>
@@ -23,7 +25,14 @@ public:
     const bool isPlanet() { return is_planet; }
     void setPosition(glm::vec4 pos) { position = pos; }
     void setTexture(GLuint text) { texture = text; };
-    
+    Image* loadImage(const std::string& file_name) {
+		Image *im = new Image();
+		if (!LoadJPEG(file_name, im)) {
+			return NULL;
+		}
+		return im;
+    }
+
     float radius;
 private:
     std::string name;
