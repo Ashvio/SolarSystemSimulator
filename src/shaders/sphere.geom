@@ -9,7 +9,7 @@ void main() {
 	for (int n = 0; n < gl_in.length(); n++) {
 		vec4 position = gl_in[n].gl_Position;
 		vec4 center = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 equidistant = normalize(position - center) * 1.0;
+		vec4 equidistant = normalize(position - center) * radius;
 		gl_Position = projection * view * model * (center + equidistant);
         EmitVertex();
 	}

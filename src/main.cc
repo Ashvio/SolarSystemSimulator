@@ -169,7 +169,9 @@ int main(int argc, char* argv[])
 	auto tess_level_data = [&gui]() -> const void* {
 		return &gui.tess_level;
 	};
-	
+	auto radius_data = [&gui]() -> const void* {
+		return &gui.radius;
+	};
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
@@ -179,6 +181,7 @@ int main(int argc, char* argv[])
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform tess_level_inner = { "tess_level_inner", float_binder, tess_level_data };
 	ShaderUniform tess_level_outer = { "tess_level_outer", float_binder, tess_level_data };
+	ShaderUniform radius = { "radius", float_binder, radius_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -193,7 +196,7 @@ int main(int argc, char* argv[])
 	RenderPass sphere_pass(-1,
 			sphere_pass_input,
 			{ sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader },
-			{ std_model, std_view, std_proj, tess_level_inner, tess_level_outer },
+			{ std_model, std_view, std_proj, tess_level_inner, tess_level_outer, radius },
 			{ "fragment_color" }
 			);
 

@@ -52,7 +52,9 @@ public:
 	int* buffer;
 	bool is_recording = false;
 
-	float tess_level = 5.0f;
+	float tess_level = 15.0f;
+	// TODO: move radius to be specific for each planet
+	float radius = 1.0f;
 	
 private:
 	GLFWwindow* window_;
