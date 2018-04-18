@@ -1,0 +1,24 @@
+{
+    "planet" : "Earth",
+    "mass" : ,
+    "diameter" : ,
+    "texture" : "assets/earth.jpg",
+    "elements" : {
+        "start" : {
+            "a" :,
+            "e" : ,
+            "I" : ,
+            "L" : ,
+            "lp" :,
+            "ln" : 
+        },
+        "diff" : {
+            "a" : ,
+            "e" : ,
+            "I" : ,
+            "L" : ,
+            "lp" : ,
+            "ln" : 
+        }
+    }
+}

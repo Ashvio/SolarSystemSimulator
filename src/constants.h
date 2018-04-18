@@ -38,4 +38,4 @@ const double NEPTUNE_DIAMETER = 49528.0;
 
 //Mathematical constants
 
-const double G = 6.6738e-11; //N-m^2/kg^2
+const double G = 6.6738e-11; //N-m^2/kg^2 Universal Gravitational Constant
