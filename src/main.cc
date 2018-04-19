@@ -5,6 +5,7 @@
 #include "config.h"
 #include "gui.h"
 #include "procedure_geometry.h"
+#include "solar_system.h"
 #include <memory>
 #include <algorithm>
 #include <fstream>
@@ -40,6 +41,25 @@ const char* floor_fragment_shader =
 #include "shaders/floor.frag"
 ;
 
+const char* sphere_vertex_shader =
+#include "shaders/sphere.vert"
+;
+
+const char* sphere_tcs_shader =
+#include "shaders/sphere.tesc"
+;
+
+const char* sphere_tes_shader =
+#include "shaders/sphere.tese"
+;
+
+const char* sphere_geometry_shader =
+#include "shaders/sphere.geom"
+;
+
+const char* sphere_fragment_shader =
+#include "shaders/sphere.frag"
+;
 
 void ErrorCallback(int error, const char* description) {
 	std::cerr << "GLFW Error: " << description << "\n";
@@ -80,9 +100,10 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
-	
+	// Create solar system here
+	SolarSystem sol = SolarSystem();
+	sol.generateSolPlanets();
 
-	
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
 	MatrixPointers mats; // Define MatrixPointers here for lambda to capture
 	/*
@@ -147,16 +168,19 @@ int main(int argc, char* argv[])
 	auto std_light_data = [&light_position]() -> const void* {
 		return &light_position[0];
 	};
-	
+	auto tess_level_data = [&gui]() -> const void* {
+		return &gui.tess_level;
+	};
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
-	//ShaderUniform std_ortho = { "orthomat", matrix_binder, std_ortho_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
-
+	ShaderUniform tess_level_inner = { "tess_level_inner", float_binder, tess_level_data };
+	ShaderUniform tess_level_outer = { "tess_level_outer", float_binder, tess_level_data };
+	
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -167,11 +191,12 @@ int main(int argc, char* argv[])
 	floor_pass_input.assignIndex(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
-			{ vertex_shader, geometry_shader, floor_fragment_shader},
+			{ vertex_shader, geometry_shader, floor_fragment_shader, nullptr, nullptr },
 			{ floor_model, std_view, std_proj, std_light },
 			{ "fragment_color" }
 			);
 
+	
 	// PMD Model render pass
 	// FIXME: initialize the input data at Mesh::loadPmd
 	
@@ -179,7 +204,7 @@ int main(int argc, char* argv[])
 	// FIXME: You won't see the bones until Skeleton::joints were properly
 	//        initialized
 	
-	bool draw_floor = true;
+	bool draw_floor = false;
 
 
 	if (argc >= 3) {
@@ -213,6 +238,42 @@ int main(int argc, char* argv[])
 			                              GL_UNSIGNED_INT, 0));
 		}
 
+		// Render solar system
+		if (sol.numPlanets() > 0) {
+			std::vector<glm::vec4> planet_vertices;
+			std::vector<glm::uvec3> planet_faces;
+			create_sphere(planet_vertices, planet_faces);
+			// Iterate through the planets and render each of them
+			for (int i = 0; i < sol.numPlanets(); i++) {
+				PlanetaryObject planet = sol.planets[i];
+				// Get specific radius for planet
+				auto radius_data = [&planet]() -> const void * {
+					return &planet.radius;
+				};
+				// Uniforms
+				ShaderUniform radius = { "radius", float_binder, radius_data };
+
+				// Rendering planet
+				RenderDataInput planet_pass_input;
+				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
+				planet_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
+				RenderPass planet_pass(-1,
+									   planet_pass_input,
+									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
+									   { std_model, std_view, std_proj, tess_level_inner, tess_level_outer, radius },
+									   { "fragment_color" });
+
+				planet_pass.setup();
+
+				glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+				CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
+											  planet_faces.size() * 3,
+											  GL_UNSIGNED_INT, 0));
+			}
+		}
+		
+		
 	
 		// Poll and swap.
 		glfwPollEvents();

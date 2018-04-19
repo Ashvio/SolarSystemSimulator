@@ -40,7 +40,7 @@ RenderDataInput::RenderDataInput()
 
 RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 	   const RenderDataInput& input,
-	   const std::vector<const char*> shaders, // Order: VS, GS, FS 
+	   const std::vector<const char*> shaders, // Order: VS, GS, FS, TCS, TES 
 	   const std::vector<ShaderUniform> uniforms,
 	   const std::vector<const char*> output // Order: 0, 1, 2...
 	  )
@@ -55,12 +55,19 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 	vs_ = compileShader(shaders[0], GL_VERTEX_SHADER);
 	gs_ = compileShader(shaders[1], GL_GEOMETRY_SHADER);
 	fs_ = compileShader(shaders[2], GL_FRAGMENT_SHADER);
+	tcs_ = compileShader(shaders[3], GL_TESS_CONTROL_SHADER);
+	tes_ = compileShader(shaders[4], GL_TESS_EVALUATION_SHADER);
+
 	CHECK_GL_ERROR(sp_ = glCreateProgram());
 	glAttachShader(sp_, vs_);
 	glAttachShader(sp_, fs_);
 	if (shaders[1])
 		glAttachShader(sp_, gs_);
-
+	if (shaders[3])
+		glAttachShader(sp_, tcs_);
+	if (shaders[4])
+		glAttachShader(sp_, tes_);
+	
 	// ... and then buffers
 	size_t nbuffer = input.getNBuffers();
 	if (input.hasIndex())
@@ -322,6 +329,7 @@ unsigned RenderPass::compileShader(const char* source_ptr, int type)
 	glCompileShader(ret);
 	CHECK_GL_SHADER_ERROR(ret);
 	shader_cache_[source_ptr] = ret;
+	//std::cout << source_ptr << std::endl;
 	return ret;
 }
 

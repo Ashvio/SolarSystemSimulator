@@ -163,7 +163,7 @@ private:
 	std::vector<unsigned> glbuffers_, unilocs_, malocs_;
 	std::vector<unsigned> gltextures_, matexids_;
 	unsigned sampler2d_;
-	unsigned vs_ = 0, gs_ = 0, fs_ = 0;
+	unsigned vs_ = 0, gs_ = 0, fs_ = 0, tcs_ = 0, tes_ = 0;
 	unsigned sp_ = 0;
 	
 	static unsigned compileShader(const char*, int type);
