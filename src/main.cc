@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
 				PlanetaryObject planet = sol.planets[i];
 				// Get specific radius for planet
 				auto radius_data = [&planet]() -> const void * {
-					return &planet.radius;
+					return planet.getDiameter();
 				};
 				// Uniforms
 				ShaderUniform radius = { "radius", float_binder, radius_data };

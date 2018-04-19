@@ -29,7 +29,7 @@ public:
         
     }
     std::string getName() { return name; }
-    const float getDiameter() { return diameter; }
+    const float* getDiameter() { return &diameter; }
     const float getMass() { return mass; }
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
@@ -68,7 +68,7 @@ public:
 
     std::vector<PlanetaryObject> planets;
 private:
-    
+    std::string sol_planets[8] = {"mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"};
 
 
 };
