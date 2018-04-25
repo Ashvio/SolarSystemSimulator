@@ -50,6 +50,29 @@ void create_sphere(std::vector<glm::vec4>& sphere_vertices, std::vector<glm::uve
 	sphere_faces.push_back(glm::uvec3(4, 9, 8));
 	sphere_faces.push_back(glm::uvec3(5, 10, 9));
 	sphere_faces.push_back(glm::uvec3(1, 6, 10));
+}
 
-		
+glm::vec2 get_uv_coord(glm::vec3 vert, float radius) {
+	glm::vec2 uv;
+	//uv[0] = asinf(vert.x)/M_PI + 0.5;
+	//uv[1] = asinf(vert.y)/M_PI + 0.5;
+	//uv[0] = atan2f(vert.x, vert.z)/2.0*M_PI + 0.5;
+	//uv[1] = vert.y * 0.5 + 0.5;
+	float theta = atan2f(-vert.z, vert.x);
+	uv[0] = (theta + M_PI)/2.0*M_PI;
+	float phi = acosf(-vert.y/radius);
+	uv[1] = phi/M_PI;
+	return uv;
+}
+
+void create_sphere_normals_and_uv(std::vector<glm::vec4>& sphere_normals, std::vector<glm::vec2>& sphere_uv, std::vector<glm::vec4>& sphere_vertices, float radius) {
+	for (uint i = 0; i < sphere_vertices.size(); i++) {
+		glm::vec4 vert = sphere_vertices[i];
+		glm::vec3 p = glm::vec3(vert.x, vert.y, vert.z);
+		p = glm::normalize(p);
+		glm::vec4 norm (p, 0.0f);
+		sphere_normals.push_back(norm);
+		glm::vec2 uv = get_uv_coord(p, radius);
+		sphere_uv.push_back(uv);
+	}
 }

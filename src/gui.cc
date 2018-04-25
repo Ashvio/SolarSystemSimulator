@@ -153,10 +153,7 @@ void GUI::mouseScrollCallback(double dx, double dy)
 void GUI::updateMatrices()
 {
 	// Compute our view, and projection matrices.
-	if (fps_mode_)
-		center_ = eye_ + camera_distance_ * look_;
-	else
-		eye_ = center_ - camera_distance_ * look_;
+	center_ = eye_ + camera_distance_ * look_;
 
 	view_matrix_ = glm::lookAt(eye_, center_, up_);
 	light_position_ = glm::vec4(eye_, 1.0f);
@@ -190,40 +187,22 @@ double GUI::getCurrentPlayTime()
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
 	if (key == GLFW_KEY_W) {
-		if (fps_mode_)
-			eye_ += zoom_speed_ * look_;
-		else
-			camera_distance_ -= zoom_speed_;
+		eye_ += zoom_speed_ * look_;
 		return true;
 	} else if (key == GLFW_KEY_S) {
-		if (fps_mode_)
-			eye_ -= zoom_speed_ * look_;
-		else
-			camera_distance_ += zoom_speed_;
+		eye_ -= zoom_speed_ * look_;
 		return true;
 	} else if (key == GLFW_KEY_A) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * tangent_;
-		else
-			center_ -= pan_speed_ * tangent_;
+		eye_ -= pan_speed_ * tangent_;
 		return true;
 	} else if (key == GLFW_KEY_D) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * tangent_;
-		else
-			center_ += pan_speed_ * tangent_;
+		eye_ += pan_speed_ * tangent_;
 		return true;
 	} else if (key == GLFW_KEY_DOWN) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * up_;
-		else
-			center_ -= pan_speed_ * up_;
+		eye_ -= pan_speed_ * up_;
 		return true;
 	} else if (key == GLFW_KEY_UP) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * up_;
-		else
-			center_ += pan_speed_ * up_;
+		eye_ += pan_speed_ * up_;
 		return true;
 	}
 	return false;

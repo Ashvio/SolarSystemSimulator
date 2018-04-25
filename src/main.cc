@@ -246,21 +246,33 @@ int main(int argc, char* argv[])
 			// Iterate through the planets and render each of them
 			for (int i = 0; i < sol.numPlanets(); i++) {
 				PlanetaryObject planet = sol.planets[i];
+				std::vector<glm::vec4> planet_normals;
+				std::vector<glm::vec2> uv_coordinates;
+				create_sphere_normals_and_uv(planet_normals, uv_coordinates, planet_vertices, planet.renderRadius);
 				// Get specific radius for planet
 				auto radius_data = [&planet]() -> const void * {
-					return planet.getDiameter();
+					return &planet.renderRadius;
+				};
+				auto text_binder = [](int loc, const void *data) {
+					//glUniform1iv(loc, 1, (const GLint*)data);
+					glUniform1i(loc, 0);
+				};
+				auto texture_data = [&planet]() -> const void * {
+					return &planet.texture;
 				};
 				// Uniforms
 				ShaderUniform radius = { "radius", float_binder, radius_data };
-
+				ShaderUniform texture = { "textureSampler", text_binder, texture_data };
 				// Rendering planet
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
+				planet_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
+				planet_pass_input.assign(2, "uv", uv_coordinates.data(), uv_coordinates.size(), 2, GL_FLOAT);
 				planet_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
 				RenderPass planet_pass(-1,
 									   planet_pass_input,
 									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
-									   { std_model, std_view, std_proj, tess_level_inner, tess_level_outer, radius },
+									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture },
 									   { "fragment_color" });
 
 				planet_pass.setup();
