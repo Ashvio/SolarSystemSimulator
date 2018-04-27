@@ -242,6 +242,9 @@ int main(int argc, char* argv[])
 		if (sol.numPlanets() > 0) {
 			std::vector<glm::vec4> planet_vertices;
 			std::vector<glm::uvec3> planet_faces;
+			//std::vector<glm::vec4> planet_normals;
+			//std::vector<glm::vec2> uv_coordinates;
+				
 			create_sphere(planet_vertices, planet_faces);
 			// Iterate through the planets and render each of them
 			for (int i = 0; i < sol.numPlanets(); i++) {
