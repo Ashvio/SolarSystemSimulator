@@ -48,6 +48,7 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height)
 	active_keys["SPACE"] = false;
 
 	movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	deceleration_velocity = 0.0f;
 }
 
 GUI::~GUI()
@@ -134,8 +135,12 @@ void GUI::updateViewingAngles() {
 		}
 	// in spaceship mode, accelerate when key pressed, keeps going at constant velocity when key not pressed
 	} else {
+
+		if (!was_space) {
+			deceleration_velocity = 0.0f;
+		}
+
 		auto velocity_delta = time_delta * 30.0f;
-		
 		// move x component
 		if (movement_velocity[0] != 0.0) {
 			next_eye += movement_velocity[0] * (float)time_delta * tangent_;
@@ -151,11 +156,17 @@ void GUI::updateViewingAngles() {
 			// decelerate with space
 			} else {
 				if (movement_velocity[0] < 0) {
-					movement_velocity[0] += velocity_delta;
+					movement_velocity[0] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					// decelerate until 0
 					movement_velocity[0] = glm::min(movement_velocity[0], 0.0f);
 				} else if (movement_velocity[0] > 0){
-					movement_velocity[0] -= velocity_delta;
+					movement_velocity[0] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					movement_velocity[0] = glm::max(movement_velocity[0], 0.0f);
 				}
 			}
@@ -176,11 +187,17 @@ void GUI::updateViewingAngles() {
 				// decelerate with space
 			} else {
 				if (movement_velocity[1] < 0) {
-					movement_velocity[1] += velocity_delta;
+					movement_velocity[1] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					// decelerate until 0
 					movement_velocity[1] = glm::min(movement_velocity[1], 0.0f);
 				} else if (movement_velocity[1] > 0){
-					movement_velocity[1] -= velocity_delta;
+					movement_velocity[1] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					movement_velocity[1] = glm::max(movement_velocity[1], 0.0f);
 				}
 			}
@@ -200,11 +217,17 @@ void GUI::updateViewingAngles() {
 				}
 			} else {
 				if (movement_velocity[2] < 0) {
-					movement_velocity[2] += velocity_delta;
+					movement_velocity[2] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					// decelerate until 0
 					movement_velocity[2] = glm::min(movement_velocity[2], 0.0f);
-				} else if (movement_velocity[1] > 0){
-					movement_velocity[2] -= velocity_delta;
+				} else if (movement_velocity[2] > 0){
+					movement_velocity[2] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
 					movement_velocity[2] = glm::max(movement_velocity[2], 0.0f);
 				}
 			}
@@ -213,6 +236,7 @@ void GUI::updateViewingAngles() {
 
 		if (movement_velocity == glm::vec3(0.0, 0.0, 0.0)) {
 			was_space = false;
+			deceleration_velocity = 0.0f;
 		}
 
 	}
@@ -349,7 +373,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS) {
 			active_keys["W"] = true;
-			if (!free_mode && movement_velocity[2] <= 0.0) {
+			if (!free_mode && movement_velocity[2] == 0.0) {
 				movement_velocity[2] = 5.0;
 			}
 			was_space = false;
@@ -360,7 +384,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_S) {
 		if (action == GLFW_PRESS) {
 			active_keys["S"] = true;
-			if (!free_mode && movement_velocity[2] >= 0.0) {
+			if (!free_mode && movement_velocity[2] == 0.0) {
 				movement_velocity[2] = -5.0;
 			}
 			was_space = false;
@@ -371,7 +395,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_A) {
 		if (action == GLFW_PRESS) {
 			active_keys["A"] = true;
-			if (!free_mode && movement_velocity[0] >= 0.0) {
+			if (!free_mode && movement_velocity[0] == 0.0) {
 				movement_velocity[0] = -5.0;
 			}
 			was_space = false;
@@ -382,7 +406,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_D) {
 		if (action == GLFW_PRESS) {
 			active_keys["D"] = true;
-			if (!free_mode && movement_velocity[0] <= 0.0) {
+			if (!free_mode && movement_velocity[0] == 0.0) {
 				movement_velocity[0] = 5.0;
 			}
 			was_space = false;
@@ -393,7 +417,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_DOWN) {
 		if (action == GLFW_PRESS) {
 			active_keys["DOWN"] = true;
-			if (!free_mode && movement_velocity[1] >= 0.0) {
+			if (!free_mode && movement_velocity[1] == 0.0) {
 				movement_velocity[1] = -5.0;
 			}
 			was_space = false;
@@ -404,7 +428,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS) {
 			active_keys["UP"] = true;
-			if (!free_mode && movement_velocity[1] <= 0.0) {
+			if (!free_mode && movement_velocity[1] == 0.0) {
 				movement_velocity[1] = 5.0;
 			}
 			was_space = false;
@@ -416,6 +440,9 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		if (action == GLFW_PRESS) {
 			active_keys["SPACE"] = true;
 			was_space = true;
+			if (!free_mode && deceleration_velocity == 0.0) {
+				deceleration_velocity = 1.0;
+			}
 		} else if (action == GLFW_RELEASE) {
 			active_keys["SPACE"] = false;
 		}

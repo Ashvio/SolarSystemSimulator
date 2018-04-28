@@ -101,6 +101,7 @@ private:
 	glm::mat3 view_y_rotation;
 	std::map<std::string, bool> active_keys;
 	glm::vec3 movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	float deceleration_velocity = 0.0f;
 };
 
 #endif
