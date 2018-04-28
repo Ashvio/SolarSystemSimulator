@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "../lib/utgraphicsutil/image.h"
+#include "../lib/utgraphicsutil/jpegio.h"
 
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -48,6 +50,10 @@ const char* floor_fragment_shader =
 
 const char* bar_frag_shader =
 #include "shaders/bar.frag"
+;
+
+const char* sky_frag_shader =
+#include "shaders/sky.frag"
 ;
 
 const char* sphere_vertex_shader =
@@ -109,9 +115,25 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
-	std::vector<glm::vec4> bar_vertices;
-	std::vector<glm::uvec3> bar_faces;
-	create_bar(bar_vertices, bar_faces);
+	std::vector<glm::vec4> rectangle_vertices;
+	std::vector<glm::uvec3> rectangle_faces;
+	std::vector<glm::vec2> tex_coords;
+	create_rectangle(rectangle_vertices, rectangle_faces, tex_coords);
+
+	// sky texture
+	Image* sky_img = PlanetaryObject::loadImage("../assets/stars.jpg");
+	GLuint sky_texture = 0;
+	if (sky_img == NULL) {
+		std::cout << "image could not be loaded" << std::endl;
+	} else {
+		glGenTextures(1, &sky_texture);
+		// bind texture
+		glBindTexture(GL_TEXTURE_2D, sky_texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		// Give the image to OpenGL
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sky_img->width, sky_img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, sky_img->bytes.data());
+	}
 
 	// Create solar system here
 	SolarSystem sol = SolarSystem();
@@ -152,11 +174,8 @@ int main(int argc, char* argv[])
  		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, *texture_data); //bind textureB as out input texture
   		glUniform1i(loc, 0); //pass texture B as a sampler to the shader
 	};
-	auto texture_binder = [](int loc, const void* data) {
-		glActiveTexture(GL_TEXTURE0); //make texture register 0 active
-		GLuint *texture_data = (GLuint *)data;
- 		glBindTexture(GL_TEXTURE_2D, *texture_data); //bind textureB as out input texture
-  		glUniform1i(loc, 0); //pass texture B as a sampler to the shader
+	auto texture_binder = [](int loc, const void *data) {
+		glUniform1i(loc, 0);
 	};
 	/*
 	 * The lambda functions below are used to retrieve data
@@ -184,6 +203,9 @@ int main(int argc, char* argv[])
 	auto tess_level_data = [&gui]() -> const void* {
 		return &gui.tess_level;
 	};
+	auto sky_texture_data = [&sky_texture]() -> const void * {
+		return &sky_texture;
+	};
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
@@ -197,7 +219,6 @@ int main(int argc, char* argv[])
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
-	//ShaderUniform bone_transform {"bone_transform", bone_transform_binder, bone_transform_data};
 	// Floor render pass
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
@@ -209,10 +230,23 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
+	RenderDataInput sky_input;
+	// Scroll bar will use the same vertices and faces as preview since we just want a rectangle
+	sky_input.assign(0, "vertex_position", rectangle_vertices.data(), rectangle_vertices.size(), 4, GL_FLOAT);
+	sky_input.assign(1, "uv", tex_coords.data(), tex_coords.size(), 2, GL_FLOAT);
+	sky_input.assignIndex(rectangle_faces.data(), rectangle_faces.size(), 3);
+	
+	ShaderUniform sky_texture_sampler = { "textureSampler", texture_binder, sky_texture_data };
+
+	RenderPass sky_pass(-1, sky_input,
+						{ vertex_shader, nullptr, sky_frag_shader, nullptr, nullptr },
+						{ sky_texture_sampler },
+						{ "fragment_color" });
+
 	RenderDataInput bar_input;
 	// Scroll bar will use the same vertices and faces as preview since we just want a rectangle
-	bar_input.assign(0, "vertex_position", bar_vertices.data(), bar_vertices.size(), 4, GL_FLOAT);
-	bar_input.assignIndex(bar_faces.data(), bar_faces.size(), 3);
+	bar_input.assign(0, "vertex_position", rectangle_vertices.data(), rectangle_vertices.size(), 4, GL_FLOAT);
+	bar_input.assignIndex(rectangle_faces.data(), rectangle_faces.size(), 3);
 	
 	RenderPass bar_pass(-1, bar_input,
 						{ vertex_shader, nullptr, bar_frag_shader, nullptr, nullptr },
@@ -228,6 +262,8 @@ int main(int argc, char* argv[])
 	
 	bool draw_floor = false;
 	bool draw_bar = true;
+	bool draw_sky = true;
+	bool draw_planets = true;
 
 	if (argc >= 3) {
 		// mesh.loadAnimationFrom(argv[2]);
@@ -241,7 +277,7 @@ int main(int argc, char* argv[])
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 		glViewport(0, 0, main_view_width, main_view_height);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
@@ -260,20 +296,30 @@ int main(int argc, char* argv[])
 			                              GL_UNSIGNED_INT, 0));
 		}
 
+		if (draw_sky) {
+			glBindTexture(GL_TEXTURE_2D, sky_texture);
+			sky_pass.setup();
+
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+										rectangle_faces.size() * 3,
+										GL_UNSIGNED_INT, 0));
+
+		}		
+
 		if (draw_bar) {
 			glViewport(main_view_width, 0, bar_width, main_view_height);
 			
 			bar_pass.setup();
 
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
-										bar_faces.size() * 3,
+										rectangle_faces.size() * 3,
 										GL_UNSIGNED_INT, 0));
 
 			glViewport(0, 0, main_view_width, main_view_height);	
 		}
 
 		// Render solar system
-		if (sol.numPlanets() > 0) {
+		if (sol.numPlanets() > 0 && draw_planets) {
 			std::vector<glm::vec4> planet_vertices;
 			std::vector<glm::uvec3> planet_faces;
 			//std::vector<glm::vec4> planet_normals;
@@ -286,6 +332,7 @@ int main(int argc, char* argv[])
 				std::vector<glm::vec4> planet_normals;
 				std::vector<glm::vec2> uv_coordinates;
 				create_sphere_normals_and_uv(planet_normals, uv_coordinates, planet_vertices, planet.renderRadius);
+				glBindTexture(GL_TEXTURE_2D, planet.texture);
 				// Get specific radius for planet
 				auto radius_data = [&planet]() -> const void * {
 					return &planet.renderRadius;
@@ -303,7 +350,7 @@ int main(int argc, char* argv[])
 				// Uniforms
 				ShaderUniform radius = { "radius", float_binder, radius_data };
 				ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
-				ShaderUniform texture = { "textureSampler", text_binder, texture_data };
+				ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
 				// Rendering planet
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
@@ -315,7 +362,7 @@ int main(int argc, char* argv[])
 									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
 									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor },
 									   { "fragment_color" });
-
+				
 				planet_pass.setup();
 
 				glPatchParameteri(GL_PATCH_VERTICES, 3);
@@ -325,7 +372,6 @@ int main(int argc, char* argv[])
 											  GL_UNSIGNED_INT, 0));
 			}
 		}
-		
 		
 	
 		// Poll and swap.

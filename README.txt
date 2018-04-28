@@ -18,4 +18,4 @@ Project Features:
   Manipulate Planet Size
     -press '0' key to reset planet size to default
     -press '-' key to decrease planet size by 1/10 until planet is 1/2 its original size
-    -press '+' key to increase planet size by 1/10 until planet is 5x its original size
+    -press '+' key to increase planet size by 1/10 until planet is 20x its original size

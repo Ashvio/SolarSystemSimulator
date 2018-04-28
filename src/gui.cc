@@ -80,7 +80,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		}
 	}
 	if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
-		if (scalePlanetRadius <= 5.0) {
+		if (scalePlanetRadius <= 20.0) {
 			scalePlanetRadius += 0.1;
 		}
 	}

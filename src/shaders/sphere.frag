@@ -16,7 +16,7 @@ void main() {
         fragment_color = vec4(color, 1.0);
         //fragment_color = vec4(vec3(vertex_normal), 1.0);
     } else {
-		fragment_color = vec4(texcolor.rgb, 0.8);
+		fragment_color = vec4(texcolor.rgb, 1.0);
     }
 }
 )zzz"

@@ -38,7 +38,7 @@ public:
     const bool isPlanet() { return is_planet; }
     void setPosition(glm::vec4 pos) { position = pos; }
 
-    Image* loadImage(const std::string& file_name) {
+    static Image* loadImage(const std::string& file_name) {
 		Image *im = new Image();
 		if (!LoadJPEG(file_name, im)) {
 			return NULL;
