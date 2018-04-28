@@ -46,6 +46,8 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height)
 	active_keys["UP"] = false;
 	active_keys["DOWN"] = false;
 	active_keys["SPACE"] = false;
+
+	movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 GUI::~GUI()
@@ -76,8 +78,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	if (mods == 0 && captureWASDUPDOWN(key, action))
 		return ;
 
-	 else if (key == GLFW_KEY_P && (mods & GLFW_MOD_CONTROL) && action != GLFW_RELEASE) {
-		toggleRecording();
+	 else if (key == GLFW_KEY_F && (mods & GLFW_MOD_CONTROL) && action == GLFW_PRESS) {
+		free_mode = !free_mode;
 	 }
 
 }
@@ -104,31 +106,33 @@ int count = 0;
 void GUI::updateViewingAngles() {
 	count++;
 	auto time_delta = toc(&timer);
-	float movement_velocity = 5.0f;
-	// KEY MOVEMENTS
 	glm::vec3 next_eye = eye_;
-	if (active_keys["W"] == true) {
-		std::cout << "pressed W" << std::endl;
-		next_eye += movement_velocity * (float)time_delta * look_;
-		std::cout << "next eye " << glm::to_string(next_eye) << std::endl;
-		std::cout << "time delta " << time_delta << std::endl;
-		std::cout << "look " << glm::to_string(look_);
+
+	// in free mode, increment eye with constant velocity while key is pressed
+	if (free_mode) {
+		float velocity = 5.0f;
+		// KEY MOVEMENTS
+		if (active_keys["W"] == true) {
+			next_eye += velocity * (float)time_delta * look_;
+			std::cout << "time delta " << time_delta << std::endl;
+		}
+		if (active_keys["S"] == true) {
+			next_eye -= velocity * (float)time_delta * look_;
+		}
+		if (active_keys["D"] == true) {
+			next_eye += velocity * (float)time_delta * tangent_;
+		}
+		if (active_keys["A"] == true) {
+			next_eye -= velocity * (float)time_delta * tangent_;
+		}
+		if (active_keys["UP"] == true) {
+			next_eye += velocity * (float)time_delta * up_;
+		}
+		if (active_keys["DOWN"] == true) {
+			next_eye -= velocity * (float)time_delta * up_;
+		}
 	}
-	if (active_keys["S"] == true) {
-		next_eye -=  movement_velocity * (float)time_delta * look_;
-	}
-	if (active_keys["D"] == true) {
-		next_eye +=  movement_velocity * (float)time_delta * tangent_;
-	}
-	if (active_keys["A"] == true) {
-		next_eye -=  movement_velocity * (float)time_delta * tangent_;
-	}
-	if (active_keys["UP"] == true) {
-		next_eye +=  movement_velocity * (float)time_delta  * up_;
-	}
-	if (active_keys["DOWN"] == true) {
-		next_eye -=  movement_velocity * (float)time_delta  * up_;
-	}
+	
 
 	if (next_eye != eye_) {
 		eye_ = next_eye;

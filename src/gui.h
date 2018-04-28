@@ -47,7 +47,6 @@ public:
 		animation_enabled  = !animation_enabled;
 	}
 
-	int getSelectedKeyFrame() { return preview_selected_keyframe; }
 	void toggleRecording();
 	FILE* ffmpeg;
 	int* buffer;
@@ -67,6 +66,8 @@ private:
 	bool fps_mode_ = false;
 	bool pose_changed_ = true;
 	bool transparent_ = false;
+	bool free_mode = true;
+
 	int current_button_ = -1;
 	float roll_speed_ = M_PI / 64.0f;
 	float last_x_ = 0.0f, last_y_ = 0.0f, current_x_ = 0.0f, current_y_ = 0.0f;
@@ -95,11 +96,11 @@ private:
 	bool first_animation = true;	
 	TicTocTimer timer;
 	double elapsed_time = 0;
-	int preview_selected_keyframe = -1;
 
 	glm::mat3 view_x_rotation;
 	glm::mat3 view_y_rotation;
 	std::map<std::string, bool> active_keys;
+	glm::vec3 movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 };
 
 #endif
