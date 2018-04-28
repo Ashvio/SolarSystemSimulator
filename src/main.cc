@@ -19,11 +19,16 @@
 #include <glm/gtx/io.hpp>
 #include <debuggl.h>
 
+
 int window_width = 1280;
 int window_height = 720;
+int main_view_width = 960;
+int main_view_height = 720;
+int preview_width = window_width - main_view_width; // 320
+int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
+int bar_width = 3;
 
-
-const std::string window_title = "mInEcrAfT";
+const std::string window_title = "Solar System Simulator";
 
 const char* vertex_shader =
 #include "shaders/default.vert"
@@ -39,6 +44,10 @@ const char* fragment_shader =
 
 const char* floor_fragment_shader =
 #include "shaders/floor.frag"
+;
+
+const char* bar_frag_shader =
+#include "shaders/bar.frag"
 ;
 
 const char* sphere_vertex_shader =
@@ -94,11 +103,15 @@ int main(int argc, char* argv[])
 {
 	
 	GLFWwindow *window = init_glefw();
-	GUI gui(window, window_width, window_height);
+	GUI gui(window, main_view_width, main_view_height, preview_height);
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
+
+	std::vector<glm::vec4> bar_vertices;
+	std::vector<glm::uvec3> bar_faces;
+	create_bar(bar_vertices, bar_faces);
 
 	// Create solar system here
 	SolarSystem sol = SolarSystem();
@@ -196,7 +209,16 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
+	RenderDataInput bar_input;
+	// Scroll bar will use the same vertices and faces as preview since we just want a rectangle
+	bar_input.assign(0, "vertex_position", bar_vertices.data(), bar_vertices.size(), 4, GL_FLOAT);
+	bar_input.assignIndex(bar_faces.data(), bar_faces.size(), 3);
 	
+	RenderPass bar_pass(-1, bar_input,
+						{ vertex_shader, nullptr, bar_frag_shader, nullptr, nullptr },
+						{ },
+						{ "fragment_color" });
+			
 	// PMD Model render pass
 	// FIXME: initialize the input data at Mesh::loadPmd
 	
@@ -205,7 +227,7 @@ int main(int argc, char* argv[])
 	//        initialized
 	
 	bool draw_floor = false;
-
+	bool draw_bar = true;
 
 	if (argc >= 3) {
 		// mesh.loadAnimationFrom(argv[2]);
@@ -217,7 +239,7 @@ int main(int argc, char* argv[])
 
 		// Setup some basic window stuff.
 		glfwGetFramebufferSize(window, &window_width, &window_height);
-		glViewport(0, 0, window_width, window_height);
+		glViewport(0, 0, main_view_width, main_view_height);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
@@ -236,6 +258,18 @@ int main(int argc, char* argv[])
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
 			                              floor_faces.size() * 3,
 			                              GL_UNSIGNED_INT, 0));
+		}
+
+		if (draw_bar) {
+			glViewport(main_view_width, 0, bar_width, main_view_height);
+			
+			bar_pass.setup();
+
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+										bar_faces.size() * 3,
+										GL_UNSIGNED_INT, 0));
+
+			glViewport(0, 0, main_view_width, main_view_height);	
 		}
 
 		// Render solar system

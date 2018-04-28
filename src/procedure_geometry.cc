@@ -15,6 +15,16 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 	floor_faces.push_back(glm::uvec3(2, 3, 0));
 }
 
+void create_bar(std::vector<glm::vec4>& bar_vertices, std::vector<glm::uvec3>& bar_faces) {
+	bar_vertices.push_back(glm::vec4(-1.0, 1.0, 0.0, 1.0));
+	bar_vertices.push_back(glm::vec4(1.0, 1.0, 0.0, 1.0));
+	bar_vertices.push_back(glm::vec4(1.0, -1.0, 0.0, 1.0));
+	bar_vertices.push_back(glm::vec4(-1.0, -1.0, 0.0, 1.0));
+	
+	bar_faces.push_back(glm::uvec3(0, 2, 1));
+	bar_faces.push_back(glm::uvec3(2, 0, 3));
+}
+
 void create_sphere(std::vector<glm::vec4>& sphere_vertices, std::vector<glm::uvec3>& sphere_faces) {
 	//std::cout << "start" << std::endl;
 /*
