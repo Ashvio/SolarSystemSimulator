@@ -54,8 +54,7 @@ public:
 	bool is_recording = false;
 
 	float tess_level = 20.0f;
-	// TODO: move radius to be specific for each planet
-	float radius = 1.0f;
+	float scalePlanetRadius = 1.0;
 	
 private:
 	GLFWwindow* window_;

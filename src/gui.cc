@@ -50,39 +50,7 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height
 	movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	deceleration_velocity = 0.0f;
 }
-/*
-GUI::GUI(GLFWwindow* window, int view_width, int view_height)
-	:window_(window)
-{
-	glfwSetWindowUserPointer(window_, this);
-	glfwSetKeyCallback(window_, KeyCallback);
-	glfwSetCursorPosCallback(window_, MousePosCallback);
-	glfwSetMouseButtonCallback(window_, MouseButtonCallback);
-	glfwSetScrollCallback(window_, MouseScrollCallback);
 
-	glfwGetWindowSize(window_, &window_width_, &window_height_);
-	if (view_width < 0 || view_height < 0) {
-		view_width_ = window_width_;
-		view_height_ = window_height_;
-	} else {
-		view_width_ = view_width;
-		view_height_ = view_height;
-	}
-	float aspect_ = static_cast<float>(view_width_) / view_height_;
-	projection_matrix_ = glm::perspective((float)(kFov * (M_PI / 180.0f)), aspect_, kNear, kFar);
-	timer = tic();
-	active_keys["W"] = false;
-	active_keys["A"] = false;
-	active_keys["S"] = false;
-	active_keys["D"] = false;
-	active_keys["UP"] = false;
-	active_keys["DOWN"] = false;
-	active_keys["SPACE"] = false;
-
-	movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-	deceleration_velocity = 0.0f;
-}
-*/
 GUI::~GUI()
 {
 }
@@ -105,6 +73,19 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		if (!SaveJPEG("Screenshot.jpeg", window_width_, window_height_, pixels)) {
 			std::cout << "error saving image" << std::endl;
 		}
+	}
+	if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
+		if (scalePlanetRadius >= 0.5) {
+			scalePlanetRadius -= 0.1;
+		}
+	}
+	if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
+		if (scalePlanetRadius <= 5.0) {
+			scalePlanetRadius += 0.1;
+		}
+	}
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+		scalePlanetRadius = 1.0;
 	}
 	
 

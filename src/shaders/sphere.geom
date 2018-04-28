@@ -8,6 +8,7 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 uniform float radius;
+uniform float scaleFactor;
 out vec4 light_direction;
 out vec4 vertex_normal;
 out vec2 uv_coords;
@@ -15,7 +16,7 @@ void main() {
 	for (int n = 0; n < gl_in.length(); n++) {
 		vec4 position = gl_in[n].gl_Position;
 		vec4 center = vec4(0.0, 0.0, 0.0, 1.0);
-		vec4 equidistant = normalize(position - center) * radius;
+		vec4 equidistant = normalize(position - center) * radius * scaleFactor;
 		gl_Position = projection * view * model * (center + equidistant);
 		light_direction = normalize(vs_light_direction[n]);
 		vertex_normal = vs_normal[n];

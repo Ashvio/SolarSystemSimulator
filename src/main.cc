@@ -290,6 +290,9 @@ int main(int argc, char* argv[])
 				auto radius_data = [&planet]() -> const void * {
 					return &planet.renderRadius;
 				};
+				auto scale_data = [&gui]() -> const void * {
+					return &gui.scalePlanetRadius;
+				};
 				auto text_binder = [](int loc, const void *data) {
 					//glUniform1iv(loc, 1, (const GLint*)data);
 					glUniform1i(loc, 0);
@@ -299,6 +302,7 @@ int main(int argc, char* argv[])
 				};
 				// Uniforms
 				ShaderUniform radius = { "radius", float_binder, radius_data };
+				ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
 				ShaderUniform texture = { "textureSampler", text_binder, texture_data };
 				// Rendering planet
 				RenderDataInput planet_pass_input;
@@ -309,7 +313,7 @@ int main(int argc, char* argv[])
 				RenderPass planet_pass(-1,
 									   planet_pass_input,
 									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
-									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture },
+									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor },
 									   { "fragment_color" });
 
 				planet_pass.setup();
