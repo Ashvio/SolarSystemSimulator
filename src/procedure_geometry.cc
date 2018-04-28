@@ -16,7 +16,7 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 }
 
 void create_sphere(std::vector<glm::vec4>& sphere_vertices, std::vector<glm::uvec3>& sphere_faces) {
-	std::cout << "start" << std::endl;
+	//std::cout << "start" << std::endl;
 /*
 	sphere_vertices.push_back(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	sphere_vertices.push_back(glm::vec4(0.894f, 0.0f, 0.447f, 1.0f));
@@ -122,7 +122,7 @@ glm::vec2 get_uv_coord(glm::vec3 vert, float radius) {
 	} else if (uv[0] > 0.75 && uv[0] < 0.75) {
 		uv[0] -= 1.0;
 	}*/
-	std::cout << "uv coordinates for " << glm::to_string(vert) << ": " << glm::to_string(uv) << std::endl;
+	//std::cout << "uv coordinates for " << glm::to_string(vert) << ": " << glm::to_string(uv) << std::endl;
 	return uv;
 }
 
