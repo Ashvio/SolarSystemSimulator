@@ -12,20 +12,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
-
-struct OrbitalElements {
-    double a;
-    double e;
-    double I;
-    double L;
-    double lp;
-    double ln;
-};
+#include "physics.h"
 
 class PlanetaryObject {
 public:
-    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements) 
-    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements) {
+    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, bool hasBcsf) 
+    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf) {
         
     }
     std::string getName() { return name; }
@@ -51,6 +43,7 @@ private:
     OrbitalElements diff_elements;
     bool is_sun;
     bool is_planet;
+    bool has_bcsf = false;
 
     glm::vec4 position;
     glm::vec4 velocity;

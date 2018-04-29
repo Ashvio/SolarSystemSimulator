@@ -14,6 +14,7 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     std::string name = j.at("planet");
     float diameter = j.at("diameter");
     float mass = j.at("mass");
+    bool hasBcsf = j.at("hasBcsf");
     OrbitalElements start_elements;
     start_elements.a = j.at("elements").at("start").at("a");
     start_elements.e = j.at("elements").at("start").at("e");
@@ -21,6 +22,12 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     start_elements.L = j.at("elements").at("start").at("L");
     start_elements.lp = j.at("elements").at("start").at("lp");
     start_elements.ln = j.at("elements").at("start").at("ln");
+    if (hasBcsf) {
+        start_elements.b = j.at("elements").at("start").at("b");
+        start_elements.c = j.at("elements").at("start").at("c");
+        start_elements.s = j.at("elements").at("start").at("s");
+        start_elements.f = j.at("elements").at("start").at("f");        
+    }
     
     OrbitalElements diff_elements;
     diff_elements.a = j.at("elements").at("diff").at("a");
@@ -30,6 +37,6 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     diff_elements.lp = j.at("elements").at("diff").at("lp");
     diff_elements.ln = j.at("elements").at("diff").at("ln");
 
-    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements);
+    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements, hasBcsf);
     return planet;
 }
