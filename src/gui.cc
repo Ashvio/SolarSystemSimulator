@@ -19,8 +19,8 @@ namespace {
 	// TIPS: The implement is provided by the ray-tracer starter code.
 }
 
-GUI::GUI(GLFWwindow* window, int view_width, int view_height)
-	:window_(window)
+GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height)
+	:window_(window), preview_height_(preview_height)
 {
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetKeyCallback(window_, KeyCallback);
@@ -38,6 +38,17 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height)
 	}
 	float aspect_ = static_cast<float>(view_width_) / view_height_;
 	projection_matrix_ = glm::perspective((float)(kFov * (M_PI / 180.0f)), aspect_, kNear, kFar);
+	timer = tic();
+	active_keys["W"] = false;
+	active_keys["A"] = false;
+	active_keys["S"] = false;
+	active_keys["D"] = false;
+	active_keys["UP"] = false;
+	active_keys["DOWN"] = false;
+	active_keys["SPACE"] = false;
+
+	movement_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	deceleration_velocity = 0.0f;
 }
 
 GUI::~GUI()
@@ -63,13 +74,26 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			std::cout << "error saving image" << std::endl;
 		}
 	}
+	if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
+		if (scalePlanetRadius >= 0.5) {
+			scalePlanetRadius -= 0.1;
+		}
+	}
+	if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
+		if (scalePlanetRadius <= 20.0) {
+			scalePlanetRadius += 0.1;
+		}
+	}
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+		scalePlanetRadius = 1.0;
+	}
 	
 
 	if (mods == 0 && captureWASDUPDOWN(key, action))
 		return ;
 
-	 else if (key == GLFW_KEY_P && (mods & GLFW_MOD_CONTROL) && action != GLFW_RELEASE) {
-		toggleRecording();
+	 else if (key == GLFW_KEY_F && (mods & GLFW_MOD_CONTROL) && action == GLFW_PRESS) {
+		free_mode = !free_mode;
 	 }
 
 }
@@ -92,6 +116,188 @@ void GUI::toggleRecording() {
     }
 }
 
+int count = 0;
+bool was_space = false;
+void GUI::updateViewingAngles() {
+	count++;
+	auto time_delta = toc(&timer);
+	glm::vec3 next_eye = eye_;
+
+	// in free mode, increment eye with constant velocity while key is pressed
+	if (free_mode) {
+		float velocity = 5.0f;
+		// KEY MOVEMENTS
+		if (active_keys["W"] == true) {
+			next_eye += velocity * (float)time_delta * look_;
+			std::cout << "time delta " << time_delta << std::endl;
+		}
+		if (active_keys["S"] == true) {
+			next_eye -= velocity * (float)time_delta * look_;
+		}
+		if (active_keys["D"] == true) {
+			next_eye += velocity * (float)time_delta * tangent_;
+		}
+		if (active_keys["A"] == true) {
+			next_eye -= velocity * (float)time_delta * tangent_;
+		}
+		if (active_keys["UP"] == true) {
+			next_eye += velocity * (float)time_delta * up_;
+		}
+		if (active_keys["DOWN"] == true) {
+			next_eye -= velocity * (float)time_delta * up_;
+		}
+	// in spaceship mode, accelerate when key pressed, keeps going at constant velocity when key not pressed
+	} else {
+
+		if (!was_space) {
+			deceleration_velocity = 0.0f;
+		}
+
+		auto velocity_delta = time_delta * 30.0f;
+		// move x component
+		if (movement_velocity[0] != 0.0) {
+			next_eye += movement_velocity[0] * (float)time_delta * tangent_;
+			// accelerate if key is pressed
+			if (!was_space) {
+				if (active_keys["A"] == true) {
+					// accelerate in negative direction, going left
+					movement_velocity[0] -= velocity_delta;
+				} else if (active_keys["D"] == true) {
+					// accelerate in positive direction, going right
+					movement_velocity[0] += velocity_delta;
+				}
+			// decelerate with space
+			} else {
+				if (movement_velocity[0] < 0) {
+					movement_velocity[0] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					// decelerate until 0
+					movement_velocity[0] = glm::min(movement_velocity[0], 0.0f);
+				} else if (movement_velocity[0] > 0){
+					movement_velocity[0] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					movement_velocity[0] = glm::max(movement_velocity[0], 0.0f);
+				}
+			}
+			
+		}
+		// move y component
+		if (movement_velocity[1] != 0.0) {
+			next_eye += movement_velocity[1] * (float)time_delta * up_;
+			// accelerate if key is pressed
+			if (!was_space) {
+				if (active_keys["DOWN"] == true) {
+					// accelerate in negative direction, going left
+					movement_velocity[1] -= velocity_delta;
+				} else if (active_keys["UP"] == true) {
+					// accelerate in positive direction, going right
+					movement_velocity[1] += velocity_delta;
+				}
+				// decelerate with space
+			} else {
+				if (movement_velocity[1] < 0) {
+					movement_velocity[1] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					// decelerate until 0
+					movement_velocity[1] = glm::min(movement_velocity[1], 0.0f);
+				} else if (movement_velocity[1] > 0){
+					movement_velocity[1] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					movement_velocity[1] = glm::max(movement_velocity[1], 0.0f);
+				}
+			}
+			
+		}
+		// move z component
+		if (movement_velocity[2] != 0.0) {
+			next_eye += movement_velocity[2] * (float)time_delta * look_;
+			if (!was_space) {
+				// accelerate if key is pressed
+				if (active_keys["S"] == true) {
+					// accelerate in negative direction, going left
+					movement_velocity[2] -= velocity_delta;
+				} else if (active_keys["W"] == true) {
+					// accelerate in positive direction, going right
+					movement_velocity[2] += velocity_delta;
+				}
+			} else {
+				if (movement_velocity[2] < 0) {
+					movement_velocity[2] += deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					// decelerate until 0
+					movement_velocity[2] = glm::min(movement_velocity[2], 0.0f);
+				} else if (movement_velocity[2] > 0){
+					movement_velocity[2] -= deceleration_velocity;
+					if (active_keys["SPACE"] == true) {
+						deceleration_velocity += velocity_delta;
+					}
+					movement_velocity[2] = glm::max(movement_velocity[2], 0.0f);
+				}
+			}
+			
+		}
+
+		if (movement_velocity == glm::vec3(0.0, 0.0, 0.0)) {
+			was_space = false;
+			deceleration_velocity = 0.0f;
+		}
+
+	}
+	
+
+	if (next_eye != eye_) {
+		eye_ = next_eye;
+	}
+
+	if (view_y_rotation != glm::mat3(1.0f) || view_x_rotation != glm::mat3(1.0f)) {
+		orientation_ = view_y_rotation * orientation_;
+		orientation_ = view_x_rotation * orientation_;
+
+		tangent_ = glm::column(orientation_, 0);
+		up_ = glm::column(orientation_, 1);
+		look_ = glm::column(orientation_, 2);
+		//	std::cout << "look y " << look_.y << std::endl;
+	}
+	/*
+	if (was_space) { 
+		current_space--;
+		if (current_space > 0) {
+			eye_[1] += 25.0f * zoom_speed_ * ((float)current_space) / 10.0f;
+			cyl->updateEye(eye_);
+		 }
+		 if (current_space <= 0) {
+			was_space = false;			
+		 }
+	}*/
+
+	if (count % 20 == 0)
+		std::cout << "FPS: " << 1 / time_delta << std::endl;
+/*
+	if (gravity_ && (!was_space || current_space <= 0) && newEyeHeight > eyeGroundHeight) {
+		auto velocity_delta = time_delta * -30.0f;
+		newEyeHeight += (velocity + velocity_delta)*time_delta; 
+		velocity += velocity_delta;
+		// velocity += .005;
+		if (newEyeHeight <= eyeGroundHeight) { //Replace with hitting the gruond
+			current_space = MAX_SPACE; //Reset jump potential when you hit the ground.
+			velocity = 0;
+			newEyeHeight = eyeGroundHeight;
+			was_space = false;
+		}
+	}
+*/
+}
+
 bool was_dragging = false;
 void GUI::mousePosCallback(double mouse_x, double mouse_y)
 {
@@ -102,31 +308,31 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	current_y_ = window_height_ - mouse_y;
 	float delta_x = current_x_ - last_x_;
 	float delta_y = current_y_ - last_y_;
-	if (sqrt(delta_x * delta_x + delta_y * delta_y) < 1e-15)
-		return;
+	//if (sqrt(delta_x * delta_x + delta_y * delta_y) < 1e-15)
+	//	return;
 	if (mouse_x > view_width_)
 		return ;
-	glm::vec3 mouse_direction = glm::normalize(glm::vec3(delta_x, delta_y, 0.0f));
+	//glm::vec3 mouse_direction = glm::normalize(glm::vec3(delta_x, delta_y, 0.0f));
 	glm::vec2 mouse_start = glm::vec2(last_x_, last_y_);
 	glm::vec2 mouse_end = glm::vec2(current_x_, current_y_);
-	glm::uvec4 viewport = glm::uvec4(0, 0, view_width_, view_height_);
 
-	bool drag_camera = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_RIGHT;
-	bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
-	// std::cout <<"MOUSE!\n";
-	if (drag_camera) {
-		glm::vec3 axis = glm::normalize(
-				orientation_ *
-				glm::vec3(mouse_direction.y, -mouse_direction.x, 0.0f)
-				);
-		orientation_ =
-			glm::mat3(glm::rotate(rotation_speed_, axis) * glm::mat4(orientation_));
-		tangent_ = glm::column(orientation_, 0);
-		up_ = glm::column(orientation_, 1);
-		look_ = glm::column(orientation_, 2);
-	} 
-	// if (transparent_) {
-		// FIXME: highlight bones that have been moused over
+	view_x_rotation = glm::mat3(1.0f);
+	view_y_rotation = glm::mat3(1.0f);
+
+	// Mouse on lower side of screen
+	if (mouse_y > view_height_ - 100) {
+		view_y_rotation = glm::mat3(glm::rotate(-8.0f * rotation_speed_, tangent_));
+	// Mouse on upper side of screen
+	} else if (mouse_y < 100 && mouse_y >= 0) {
+		view_y_rotation = glm::mat3(glm::rotate(8.0f * rotation_speed_, tangent_));
+	}
+	// Mouse on right side of screen
+	if (mouse_x > view_width_ - 100) {
+		view_x_rotation = glm::mat3(glm::rotate(-8.0f * rotation_speed_, glm::vec3(0.0f, 1.0f, 0.0f)));
+	// Mouse on left side of screen
+	} else if (mouse_x < 100 && mouse_x >= 0) {
+		view_x_rotation = glm::mat3(glm::rotate(8.0f * rotation_speed_, glm::vec3(0.0f, 1.0f, 0.0f)));
+	}
 
 }
 
@@ -152,11 +358,9 @@ void GUI::mouseScrollCallback(double dx, double dy)
 
 void GUI::updateMatrices()
 {
+	updateViewingAngles();
 	// Compute our view, and projection matrices.
-	if (fps_mode_)
-		center_ = eye_ + camera_distance_ * look_;
-	else
-		eye_ = center_ - camera_distance_ * look_;
+	center_ = eye_ + camera_distance_ * look_;
 
 	view_matrix_ = glm::lookAt(eye_, center_, up_);
 	light_position_ = glm::vec4(eye_, 1.0f);
@@ -176,54 +380,85 @@ MatrixPointers GUI::getMatrixPointers() const
 	return ret;
 }
 
-double GUI::getCurrentPlayTime()
-{
-	if (first_animation) {
-		timer = tic();
-		elapsed_time = 0;
-	} else {
-		elapsed_time += toc(&timer);
-	}
-	return elapsed_time;
-}
-
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
+	
 	if (key == GLFW_KEY_W) {
-		if (fps_mode_)
-			eye_ += zoom_speed_ * look_;
-		else
-			camera_distance_ -= zoom_speed_;
+		if (action == GLFW_PRESS) {
+			active_keys["W"] = true;
+			if (!free_mode && movement_velocity[2] == 0.0) {
+				movement_velocity[2] = 5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["W"] = false;
+		}
 		return true;
 	} else if (key == GLFW_KEY_S) {
-		if (fps_mode_)
-			eye_ -= zoom_speed_ * look_;
-		else
-			camera_distance_ += zoom_speed_;
+		if (action == GLFW_PRESS) {
+			active_keys["S"] = true;
+			if (!free_mode && movement_velocity[2] == 0.0) {
+				movement_velocity[2] = -5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["S"] = false;
+		}
 		return true;
 	} else if (key == GLFW_KEY_A) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * tangent_;
-		else
-			center_ -= pan_speed_ * tangent_;
+		if (action == GLFW_PRESS) {
+			active_keys["A"] = true;
+			if (!free_mode && movement_velocity[0] == 0.0) {
+				movement_velocity[0] = -5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["A"] = false;
+		}
 		return true;
 	} else if (key == GLFW_KEY_D) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * tangent_;
-		else
-			center_ += pan_speed_ * tangent_;
+		if (action == GLFW_PRESS) {
+			active_keys["D"] = true;
+			if (!free_mode && movement_velocity[0] == 0.0) {
+				movement_velocity[0] = 5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["D"] = false;
+		}
 		return true;
 	} else if (key == GLFW_KEY_DOWN) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * up_;
-		else
-			center_ -= pan_speed_ * up_;
+		if (action == GLFW_PRESS) {
+			active_keys["DOWN"] = true;
+			if (!free_mode && movement_velocity[1] == 0.0) {
+				movement_velocity[1] = -5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["DOWN"] = false;
+		}
 		return true;
 	} else if (key == GLFW_KEY_UP) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * up_;
-		else
-			center_ += pan_speed_ * up_;
+		if (action == GLFW_PRESS) {
+			active_keys["UP"] = true;
+			if (!free_mode && movement_velocity[1] == 0.0) {
+				movement_velocity[1] = 5.0;
+			}
+			was_space = false;
+		} else if (action == GLFW_RELEASE) {
+			active_keys["UP"] = false;
+		}
+		return true;
+	} else  if (key == GLFW_KEY_SPACE) {
+		if (action == GLFW_PRESS) {
+			active_keys["SPACE"] = true;
+			was_space = true;
+			if (!free_mode && deceleration_velocity == 0.0) {
+				deceleration_velocity = 1.0;
+			}
+		} else if (action == GLFW_RELEASE) {
+			active_keys["SPACE"] = false;
+		}
 		return true;
 	}
 	return false;

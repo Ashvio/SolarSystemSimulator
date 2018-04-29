@@ -2,8 +2,12 @@ R"zzz(#version 400 core
 layout (vertices = 3) out;
 uniform float tess_level_inner;
 uniform float tess_level_outer;
-//in vec4 vs_light_direction[];
-//out vec4 tcs_vs_light_direction[];
+in vec4 vs_light_direction[];
+in vec4 vs_normal[];
+in vec2 vs_uv[];
+out vec4 tcs_vs_light_direction[];
+out vec4 tcs_normal[];
+out vec2 tcs_uv[];
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
@@ -13,6 +17,8 @@ void main()
     	gl_TessLevelOuter[1] = tess_level_outer;
     	gl_TessLevelOuter[2] = tess_level_outer;
 	}
-	//tcs_vs_light_direction[gl_InvocationID] = vs_light_direction[gl_InvocationID];
+	tcs_vs_light_direction[gl_InvocationID] = vs_light_direction[gl_InvocationID];
+	tcs_normal[gl_InvocationID] = vs_normal[gl_InvocationID];
+	tcs_uv[gl_InvocationID] = vs_uv[gl_InvocationID];
 }
 )zzz";
