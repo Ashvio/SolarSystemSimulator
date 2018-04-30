@@ -29,7 +29,7 @@ class Gravity {
 
 
 class Date {
-    
+    public:  
     Date(unsigned int year, unsigned int month, unsigned int day) {
         setDate(year, month, day);
     }
@@ -90,6 +90,7 @@ class Date {
             std::cout << "Invalid days" << day << std::endl;
             return false;
         }
+        return true;
     }
     static unsigned int getNumDaysMonth(unsigned int month, unsigned int year) { 
         if (month == 2) {

@@ -320,6 +320,7 @@ int main(int argc, char* argv[])
 
 		// Render solar system
 		if (sol.numPlanets() > 0 && draw_planets) {
+            sol.generateSolPlanetPositions();
 			std::vector<glm::vec4> planet_vertices;
 			std::vector<glm::uvec3> planet_faces;
 			//std::vector<glm::vec4> planet_normals;
@@ -337,6 +338,10 @@ int main(int argc, char* argv[])
 				auto radius_data = [&planet]() -> const void * {
 					return &planet.renderRadius;
 				};
+                auto position_data = [&planet]() -> const void * { 
+
+                    return planet.getPosition();
+                };
 				auto scale_data = [&gui]() -> const void * {
 					return &gui.scalePlanetRadius;
 				};
@@ -351,6 +356,7 @@ int main(int argc, char* argv[])
 				ShaderUniform radius = { "radius", float_binder, radius_data };
 				ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
 				ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
+                ShaderUniform position = { "position", vector_binder, position_data };
 				// Rendering planet
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);

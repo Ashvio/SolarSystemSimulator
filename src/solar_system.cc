@@ -24,6 +24,36 @@ void SolarSystem::generateSolPlanets() {
         planets.push_back(planet);
 }
 
+void SolarSystem::generateSolPlanetPosition(PlanetaryObject& planet, double centuries_past_J2000) {
+    OrbitalElements current_elements = OrbitalElements::computeCurrentElements(planet.start_elements, planet.diff_elements, planet.has_bcsf, centuries_past_J2000);
+    //All our variables..
+    double perihelion;
+    double mean_anomaly;
+    double eccentric_anomaly;
+    glm::dvec3 heliocentric_coords;
+    glm::dvec3 ecliptic_coords;
+    glm::dvec3 equatorial_coords;
+    
+    //All our math..
+    current_elements.computePerihelionAndMeanAnomaly(perihelion, mean_anomaly, planet.has_bcsf, centuries_past_J2000);
+    current_elements.computeEccentricAnomaly(mean_anomaly, eccentric_anomaly, 1000);
+    current_elements.computeHeliocentricCoordinates(eccentric_anomaly, heliocentric_coords);
+    current_elements.computeEclipticCoordinates(heliocentric_coords, perihelion, ecliptic_coords);
+    current_elements.computeEquatorialCoordinates(ecliptic_coords, equatorial_coords);
+    planet.setPosition(glm::dvec4(equatorial_coords, 1.0));
+    
+
+}
+
+
+void SolarSystem::generateSolPlanetPositions() {
+    double centuries_past_J2000 = current_date.getCenturiesPastJ2000();
+    for (auto& planet : planets) {
+        generateSolPlanetPosition(planet, centuries_past_J2000);    
+    }
+
+}
+
 void PlanetaryObject::loadTexture(const std::string& file_name) {
     // Get image
     Image* img = loadImage(file_name);

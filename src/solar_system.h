@@ -23,6 +23,7 @@ public:
     }
     std::string getName() { return name; }
     const float* getDiameter() { return &diameter; }
+    const glm::dvec4* getPosition() {return &position;}
     const float getMass() { return mass; }
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
@@ -39,31 +40,38 @@ public:
 
     float renderRadius;
     GLuint texture;
+    OrbitalElements start_elements;
+    OrbitalElements diff_elements;
+    bool has_bcsf = false;
 private:
     std::string name;
     float diameter;
     float mass;
-    OrbitalElements start_elements;
-    OrbitalElements diff_elements;
     bool is_sun;
     bool is_planet;
-    bool has_bcsf = false;
 
-    glm::vec4 position;
-    glm::vec4 velocity;
+    glm::dvec4 position;
+    glm::dvec4 velocity;
 };
 
 class SolarSystem {
 public:
-    SolarSystem() {}
+    SolarSystem() : current_date(2000, 1, 1) {
+    
+    }
 
     void generateSolPlanets();
+    void generateSolPlanetPositions();
     PlanetaryObject loadPlanetFromConfig(std::string config_file);
     static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary_faces);
     int numPlanets() { return planets.size(); }
+    void incrementDate() { current_date.incrementDate(); }
+    void decrementDate() { current_date.decrementDate(); }
 
     std::vector<PlanetaryObject> planets;
 private:
+    void generateSolPlanetPosition(PlanetaryObject& planet, double centuries_past_J2000);
+    Date current_date;    
     std::string sol_planets[8] = {"mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"};
 
 
