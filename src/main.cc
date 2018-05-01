@@ -371,15 +371,15 @@ int main(int argc, char* argv[])
 			// Iterate through the planets and render each of them
 			for (int i = 0; i < sol.numPlanets(); i++) {
 				PlanetaryObject planet = sol.planets[i];
+				glm::vec4 pos = glm::vec4(*planet.getPosition());
 				
 				glBindTexture(GL_TEXTURE_2D, planet.texture);
 				// Get specific radius for planet
 				auto radius_data = [&planet]() -> const void * {
 					return &planet.renderRadius;
 				};
-                auto position_data = [&planet]() -> const void * { 
-
-                    return planet.getPosition();
+                auto planet_position_data = [&pos]() -> const void * { 
+                    return &pos;
                 };
 				auto scale_data = [&gui]() -> const void * {
 					return &gui.scalePlanetRadius;
@@ -395,7 +395,7 @@ int main(int argc, char* argv[])
 				ShaderUniform radius = { "radius", float_binder, radius_data };
 				ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
 				ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
-                ShaderUniform position = { "position", vector_binder, position_data };
+                ShaderUniform planet_position = { "planet_position", vector_binder, planet_position_data };
 				// Rendering planet
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
 				RenderPass planet_pass(-1,
 									   planet_pass_input,
 									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
-									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor },
+									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor, planet_position },
 									   { "fragment_color" });
 				
 				planet_pass.setup();

@@ -19,11 +19,13 @@ public:
     PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf) 
     : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf) {
         loadTexture(texture_name);
-        renderRadius = diameter / 2.0f / 100.0f;
+        renderRadius = diameter / 2.0f / 1000.0f;
+        position = glm::vec4(0.0, 0.0, 0.0, 1.0);
     }
 
     PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet) : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet) {
-        renderRadius = diameter / 2.0f / 100.0f;
+        renderRadius = diameter / 2.0f / 1000.0f;
+        position = glm::vec4(0.0, 0.0, 0.0, 1.0);
     }
     std::string getName() { return name; }
     const float* getDiameter() { return &diameter; }
