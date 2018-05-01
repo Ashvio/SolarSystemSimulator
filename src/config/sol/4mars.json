@@ -3,7 +3,12 @@
     "mass" : 6.417e23,
     "diameter" : 6792.0,
     "texture" : "../assets/mars.jpg",
-    "hasBcsf" : false,  
+    "hasBcsf" : false,
+    "color" : {
+        "r" : 0.6,
+        "g" : 0.396,
+        "b" : 0.082
+    },
     "elements" : {
         "start" : {
             "a" : 1.52371243,

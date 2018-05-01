@@ -4,6 +4,11 @@
     "diameter" : 4879.0,
     "texture" : "../assets/mercury.jpg",
     "hasBcsf" : false,
+    "color" : {
+        "r" : 0.502,
+        "g" : 0.502,
+        "b" : 0.502
+    },
     "elements" : {
         "start" : {
             "a" : 0.38709843,

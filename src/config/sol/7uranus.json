@@ -4,6 +4,11 @@
     "diameter" : 51118.0,
     "texture" : "../assets/uranus.jpg",
     "hasBcsf" : true,
+    "color" : {
+        "r" : 0.686,
+        "g" : 0.933,
+        "b" : 0.933
+    },
     "elements" : {
         "start" : {
             "a" :19.18797948,

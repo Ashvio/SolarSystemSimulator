@@ -16,6 +16,11 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     float mass = j.at("mass");
     std::string texture_name = j.at("texture");
     bool hasBcsf = j.at("hasBcsf");
+    float r = j.at("color").at("r");
+    float g = j.at("color").at("g");
+    float b = j.at("color").at("b");
+    glm::vec3 color (r, g, b);
+    
     OrbitalElements start_elements;
     start_elements.a = j.at("elements").at("start").at("a");
     start_elements.e = j.at("elements").at("start").at("e");
@@ -38,6 +43,6 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     diff_elements.lp = j.at("elements").at("diff").at("lp");
     diff_elements.ln = j.at("elements").at("diff").at("ln");
 
-    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements, texture_name, hasBcsf);
+    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements, texture_name, hasBcsf, color);
     return planet;
 }

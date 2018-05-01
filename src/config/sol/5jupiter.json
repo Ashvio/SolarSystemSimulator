@@ -4,6 +4,11 @@
     "diameter" : 142984.0,
     "texture" : "../assets/jupiter.jpg",
     "hasBcsf" : true,
+    "color" : {
+        "r" : 0.545,
+        "g" : 0.271,
+        "b" : 0.075
+    },
     "elements" : {
         "start" : {
             "a" :5.20248019,

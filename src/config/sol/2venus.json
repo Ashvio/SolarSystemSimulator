@@ -3,7 +3,12 @@
     "mass" : 4.867e23,
     "diameter" : 12104.0,
     "texture" : "../assets/venus.jpg",
-    "hasBcsf" : false,  
+    "hasBcsf" : false,
+    "color" : {
+        "r" : 0.718,
+        "g" : 0.255,
+        "b" : 0.055
+    },
     "elements" : {
         "start" : {
             "a" : 0.72332102,

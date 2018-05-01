@@ -16,8 +16,8 @@
 
 class PlanetaryObject {
 public:
-    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf) 
-    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf) {
+    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf, glm::vec3 color) 
+    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf), color(color) {
         loadTexture(texture_name);
         renderRadius = diameter / 2.0f / 1000.0f;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
@@ -49,6 +49,7 @@ public:
     OrbitalElements start_elements;
     OrbitalElements diff_elements;
     bool has_bcsf = false;
+    glm::vec3 color;
 private:
     std::string name;
     float diameter;
