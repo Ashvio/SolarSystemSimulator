@@ -2,7 +2,7 @@
     "planet" : "Mars",
     "mass" : 6.417e23,
     "diameter" : 6792.0,
-    "texture" : "assets/mars.jpg",
+    "texture" : "../assets/mars.jpg",
     "elements" : {
         "start" : {
             "a" : 1.52371243,

@@ -15,6 +15,14 @@
 #include "../lib/utgraphicsutil/image.h"
 #include "../lib/utgraphicsutil/jpegio.h"
 
+#include <QtCore>
+#include <QApplication>
+#include <QWidget>
+#include <QTextStream>
+#include <QDate>
+#include <QTime>
+#include <QSurfaceFormat>
+
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -100,6 +108,7 @@ GLFWwindow* init_glefw()
 	const GLubyte* renderer = glGetString(GL_RENDERER);  // get renderer string
 	const GLubyte* version = glGetString(GL_VERSION);    // version as a string
 	std::cout << "Renderer: " << renderer << "\n";
+	std::cout << "Qt version: " << qVersion() << std::endl;
 	std::cout << "OpenGL version supported:" << version << "\n";
 
 	return ret;
@@ -107,7 +116,40 @@ GLFWwindow* init_glefw()
 
 int main(int argc, char* argv[])
 {
-	
+	/*
+	// Create simple window
+	QApplication app(argc, argv);
+
+    QWidget qwindow;
+
+    qwindow.resize(250, 150);
+    qwindow.setWindowTitle("Simple example");
+    qwindow.show();
+	*/
+/*
+	QTextStream out(stdout);
+
+    QDate cd = QDate::currentDate();
+   QTime ct = QTime::currentTime();
+   
+   out << "Current date is: " << cd.toString() << endl;
+   out << "Current time is: " << ct.toString() << endl; */
+	/*QApplication app(argc, argv);  
+ 	QSurfaceFormat format;
+    //format.setDepthBufferSize(24);
+    QSurfaceFormat::setDefaultFormat(format);
+
+    app.setApplicationName("Solar System Simulator");
+
+	QWidget qwindow;
+
+    qwindow.resize(window_width, window_height);
+    qwindow.setWindowTitle("Solar System Simulator");
+    qwindow.show();
+
+	return app.exec();
+  */
+
 	GLFWwindow *window = init_glefw();
 	GUI gui(window, main_view_width, main_view_height, preview_height);
 
@@ -322,16 +364,13 @@ int main(int argc, char* argv[])
 		if (sol.numPlanets() > 0 && draw_planets) {
 			std::vector<glm::vec4> planet_vertices;
 			std::vector<glm::uvec3> planet_faces;
-			//std::vector<glm::vec4> planet_normals;
-			//std::vector<glm::vec2> uv_coordinates;
+			std::vector<glm::vec4> planet_normals;
 				
-			create_sphere(planet_vertices, planet_faces);
+			create_sphere(planet_vertices, planet_faces, planet_normals);
 			// Iterate through the planets and render each of them
 			for (int i = 0; i < sol.numPlanets(); i++) {
 				PlanetaryObject planet = sol.planets[i];
-				std::vector<glm::vec4> planet_normals;
-				std::vector<glm::vec2> uv_coordinates;
-				create_sphere_normals_and_uv(planet_normals, uv_coordinates, planet_vertices, planet.renderRadius);
+				
 				glBindTexture(GL_TEXTURE_2D, planet.texture);
 				// Get specific radius for planet
 				auto radius_data = [&planet]() -> const void * {
@@ -355,7 +394,6 @@ int main(int argc, char* argv[])
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
 				planet_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
-				planet_pass_input.assign(2, "uv", uv_coordinates.data(), uv_coordinates.size(), 2, GL_FLOAT);
 				planet_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
 				RenderPass planet_pass(-1,
 									   planet_pass_input,
@@ -370,6 +408,7 @@ int main(int argc, char* argv[])
 				CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
 											  planet_faces.size() * 3,
 											  GL_UNSIGNED_INT, 0));
+
 			}
 		}
 		

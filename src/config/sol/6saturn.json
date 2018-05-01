@@ -2,7 +2,7 @@
     "planet" : "Saturn",
     "mass" : 5.685e26,
     "diameter" : 120536.0,
-    "texture" : "assets/earth.jpg",
+    "texture" : "../assets/saturn.jpg",
     "elements" : {
         "start" : {
             "a" : 9.54149883,

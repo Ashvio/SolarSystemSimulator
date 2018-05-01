@@ -2,7 +2,7 @@
     "planet" : "Jupiter",
     "mass" : 1.899e27,
     "diameter" : 142984.0,
-    "texture" : "assets/earth.jpg",
+    "texture" : "../assets/jupiter.jpg",
     "elements" : {
         "start" : {
             "a" :5.20248019,

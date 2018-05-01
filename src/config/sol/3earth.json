@@ -2,7 +2,7 @@
     "planet" : "Earth",
     "mass" : 5.972e24,
     "diameter" : 12756.0,
-    "texture" : "assets/earth.jpg",
+    "texture" : "../assets/earth.jpg",
     "elements" : {
         "start" : {
             "a" : 1.00000018,

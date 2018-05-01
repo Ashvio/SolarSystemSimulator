@@ -1,8 +1,8 @@
 R"zzz(#version 430 core
+#define M_PI 3.1415926535897932384626433832795
 layout (triangles, equal_spacing, cw) in;
 in vec4 tcs_vs_light_direction[];
 in vec4 tcs_normal[];
-in vec2 tcs_uv[];
 out vec4 vs_light_direction;
 out vec4 vs_normal;
 out vec2 vs_uv;
@@ -17,7 +17,14 @@ void main(void){
 	vs_normal = (gl_TessCoord.x * tcs_normal[0] +
 				 gl_TessCoord.y * tcs_normal[1] + 
 				 gl_TessCoord.z * tcs_normal[2]);
-	vs_uv = (gl_TessCoord.x * tcs_uv[0] +
-			 gl_TessCoord.y * tcs_uv[1]);
+
+	vec4 position = normalize(gl_Position);
+	vs_uv[0] = atan(position[2], position[0])/(2.0*M_PI) + 0.5;
+	vs_uv[1] = acos(position[1])/(M_PI);
+	if (vs_uv[0] < 0.75 && vs_uv[1] > 0.75) {
+		vs_uv[0] += 1.0;
+	} else if (vs_uv[0] > 0.75 && vs_uv[0] < 0.75) {
+		vs_uv[0] -= 1.0;
+	}
 }
 )zzz";

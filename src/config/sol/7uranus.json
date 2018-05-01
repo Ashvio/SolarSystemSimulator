@@ -2,7 +2,7 @@
     "planet" : "Uranus",
     "mass" : 8.682e25,
     "diameter" : 51118.0,
-    "texture" : "assets/earth.jpg",
+    "texture" : "../assets/uranus.jpg",
     "elements" : {
         "start" : {
             "a" :19.18797948,

@@ -14,6 +14,7 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     std::string name = j.at("planet");
     float diameter = j.at("diameter");
     float mass = j.at("mass");
+    std::string texture_name = j.at("texture");
     OrbitalElements start_elements;
     start_elements.a = j.at("elements").at("start").at("a");
     start_elements.e = j.at("elements").at("start").at("e");
@@ -30,6 +31,6 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     diff_elements.lp = j.at("elements").at("diff").at("lp");
     diff_elements.ln = j.at("elements").at("diff").at("ln");
 
-    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements);
+    PlanetaryObject planet(name, diameter, mass, false, true, start_elements, diff_elements, texture_name);
     return planet;
 }
