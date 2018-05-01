@@ -3,6 +3,7 @@
     "mass" : 5.972e24,
     "diameter" : 12756.0,
     "texture" : "../assets/earth.jpg",
+    "hasBcsf" : false, 
     "elements" : {
         "start" : {
             "a" : 1.00000018,

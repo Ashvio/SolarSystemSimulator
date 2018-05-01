@@ -3,6 +3,7 @@
     "mass" : 3.301e23,
     "diameter" : 4879.0,
     "texture" : "../assets/mercury.jpg",
+    "hasBcsf" : false,
     "elements" : {
         "start" : {
             "a" : 0.38709843,
