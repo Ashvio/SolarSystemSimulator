@@ -15,14 +15,6 @@
 #include "../lib/utgraphicsutil/image.h"
 #include "../lib/utgraphicsutil/jpegio.h"
 
-#include <QtCore>
-#include <QApplication>
-#include <QWidget>
-#include <QTextStream>
-#include <QDate>
-#include <QTime>
-#include <QSurfaceFormat>
-
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -108,7 +100,6 @@ GLFWwindow* init_glefw()
 	const GLubyte* renderer = glGetString(GL_RENDERER);  // get renderer string
 	const GLubyte* version = glGetString(GL_VERSION);    // version as a string
 	std::cout << "Renderer: " << renderer << "\n";
-	std::cout << "Qt version: " << qVersion() << std::endl;
 	std::cout << "OpenGL version supported:" << version << "\n";
 
 	return ret;
@@ -116,40 +107,6 @@ GLFWwindow* init_glefw()
 
 int main(int argc, char* argv[])
 {
-	/*
-	// Create simple window
-	QApplication app(argc, argv);
-
-    QWidget qwindow;
-
-    qwindow.resize(250, 150);
-    qwindow.setWindowTitle("Simple example");
-    qwindow.show();
-	*/
-/*
-	QTextStream out(stdout);
-
-    QDate cd = QDate::currentDate();
-   QTime ct = QTime::currentTime();
-   
-   out << "Current date is: " << cd.toString() << endl;
-   out << "Current time is: " << ct.toString() << endl; */
-	/*QApplication app(argc, argv);  
- 	QSurfaceFormat format;
-    //format.setDepthBufferSize(24);
-    QSurfaceFormat::setDefaultFormat(format);
-
-    app.setApplicationName("Solar System Simulator");
-
-	QWidget qwindow;
-
-    qwindow.resize(window_width, window_height);
-    qwindow.setWindowTitle("Solar System Simulator");
-    qwindow.show();
-
-	return app.exec();
-  */
-
 	GLFWwindow *window = init_glefw();
 	GUI gui(window, main_view_width, main_view_height, preview_height);
 
