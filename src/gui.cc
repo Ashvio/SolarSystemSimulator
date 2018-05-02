@@ -125,7 +125,7 @@ void GUI::updateViewingAngles() {
 
 	// in free mode, increment eye with constant velocity while key is pressed
 	if (free_mode) {
-		float velocity = 5.0f;
+		float velocity = 100000.0f;
 		// KEY MOVEMENTS
 		if (active_keys["W"] == true) {
 			next_eye += velocity * (float)time_delta * look_;
@@ -153,7 +153,7 @@ void GUI::updateViewingAngles() {
 			deceleration_velocity = 0.0f;
 		}
 
-		auto velocity_delta = time_delta * 30.0f;
+		auto velocity_delta = time_delta * 30000.0f;
 		// move x component
 		if (movement_velocity[0] != 0.0) {
 			next_eye += movement_velocity[0] * (float)time_delta * tangent_;

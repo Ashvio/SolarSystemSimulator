@@ -10,6 +10,7 @@
 #include <map>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "physics.h"
@@ -19,21 +20,24 @@ public:
     PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf, glm::vec3 color) 
     : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf), color(color) {
         loadTexture(texture_name);
-        renderRadius = diameter / 2.0f / 1000.0f;
+        renderRadius = 10* diameter / 2.0f / SCALE_FACTOR;
+        if (!is_sun) renderRadius *= 200.0;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
     }
 
-    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet) : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet) {
-        renderRadius = diameter / 2.0f / 1000.0f;
+    PlanetaryObject() {
+        renderRadius = 1.0;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
     }
     std::string getName() { return name; }
     const float* getDiameter() { return &diameter; }
-    const glm::dvec4* getPosition() {return &position;}
+    const glm::dvec4* getPosition() {
+        return &position;
+    }
     const float getMass() { return mass; }
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
-    void setPosition(glm::vec4 pos) { position = pos; }
+    void setPosition(glm::dvec4 pos) { position = pos; }
 
     static Image* loadImage(const std::string& file_name) {
 		Image *im = new Image();
@@ -59,27 +63,30 @@ private:
 
     glm::dvec4 position;
     glm::dvec4 velocity;
+    glm::dvec4 accel;
 };
 
 class SolarSystem {
 public:
-    SolarSystem() : current_date(2000, 1, 1) {
+    SolarSystem() : current_date(2000, 1, 1), sun() {
     
     }
 
     void generateSolPlanets();
     void generateSolPlanetPositions();
+    void updateSolPlanetPositionsGravity();
     PlanetaryObject loadPlanetFromConfig(std::string config_file);
     static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary_faces);
     int numPlanets() { return planets.size(); }
     void incrementDate() { current_date.incrementDate(); }
     void decrementDate() { current_date.decrementDate(); }
-
+    Date getDate() {return current_date;}
     std::vector<PlanetaryObject> planets;
+    PlanetaryObject sun;
 private:
     void generateSolPlanetPosition(PlanetaryObject& planet, double centuries_past_J2000);
     Date current_date;    
-    std::string sol_planets[8] = {"mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"};
+    std::string sol_planets[9] = {"sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"};
 
 
 };
