@@ -1,15 +1,20 @@
 #include "solar_system.h"
+#include <glm/gtx/string_cast.hpp>
 
 void SolarSystem::generateSolPlanets() {
     // std::string name, float radius, float mass, bool is_sun, bool is_planet
     
-    int i = 1;
+    int i = 0;
     
     for (std::string name : sol_planets) {
         std::string num = std::to_string(i);
         std::string fn = "../src/config/sol/" + num + name + ".json";
         PlanetaryObject planet = loadPlanetFromConfig(fn);
-        planets.push_back(planet);
+        if (i > 0) {
+            planets.push_back(planet);
+        } else {
+            sun = planet;
+        }
         i++;
     }
 }
@@ -26,13 +31,15 @@ void SolarSystem::generateSolPlanetPosition(PlanetaryObject& planet, double cent
     
     //All our math..
     current_elements.computePerihelionAndMeanAnomaly(perihelion, mean_anomaly, planet.has_bcsf, centuries_past_J2000);
-    current_elements.computeEccentricAnomaly(mean_anomaly, eccentric_anomaly, 1000);
+    current_elements.computeEccentricAnomaly(mean_anomaly, eccentric_anomaly, 10000);
     current_elements.computeHeliocentricCoordinates(eccentric_anomaly, heliocentric_coords);
     current_elements.computeEclipticCoordinates(heliocentric_coords, perihelion, ecliptic_coords);
     current_elements.computeEquatorialCoordinates(ecliptic_coords, equatorial_coords);
-    planet.setPosition(glm::dvec4(equatorial_coords, 1.0));
+    // equatorial_coords[1] = 0.0;
+    planet.setPosition(glm::dvec4(equatorial_coords * (AU/SCALE_FACTOR), 1.0));
+    // std::cout << planet.getName() << " " << glm::to_string(*planet.getPosition()) << std::endl;
+    // std::cout << planet.getName() << " " << (glm::length(*planet.getPosition())) << std::endl;
     
-
 }
 
 

@@ -22,10 +22,10 @@
 #include <debuggl.h>
 
 
-int window_width = 1280;
-int window_height = 720;
-int main_view_width = 960;
-int main_view_height = 720;
+int window_width = 1880;
+int window_height = 1000;
+int main_view_width = 1560;
+int main_view_height = 1000;
 int preview_width = window_width - main_view_width; // 320
 int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
 int bar_width = 3;
@@ -267,7 +267,8 @@ int main(int argc, char* argv[])
 	if (argc >= 3) {
 		// mesh.loadAnimationFrom(argv[2]);
 	}
-
+	int m = 0;
+	
 	while (!glfwWindowShouldClose(window)) {
 
 		
@@ -276,7 +277,7 @@ int main(int argc, char* argv[])
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 		glViewport(0, 0, main_view_width, main_view_height);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		//glEnable(GL_DEPTH_TEST);
+		// glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
@@ -319,6 +320,14 @@ int main(int argc, char* argv[])
 
 		// Render solar system
 		if (sol.numPlanets() > 0 && draw_planets) {
+			if (m % 5  == 0) {
+				std::cout << sol.getDate().getDate() << "\n";
+				sol.incrementDate();
+			    double centuries_past_J2000 = sol.getDate().getCenturiesPastJ2000();		
+				std::cout << "Time: " << centuries_past_J2000 << "\n";
+			}
+			m++;
+			
             sol.generateSolPlanetPositions();
 			std::vector<glm::vec4> planet_vertices;
 			std::vector<glm::uvec3> planet_faces;
@@ -326,8 +335,13 @@ int main(int argc, char* argv[])
 				
 			create_sphere(planet_vertices, planet_faces, planet_normals);
 			// Iterate through the planets and render each of them
-			for (int i = 0; i < sol.numPlanets(); i++) {
-				PlanetaryObject planet = sol.planets[i];
+			for (int i = -1; i < sol.numPlanets(); i++) {
+				PlanetaryObject planet;
+				if (i == -1) {
+					planet = sol.sun;
+				} else {
+					planet = sol.planets[i];
+				}
 				glm::vec4 pos = glm::vec4(*planet.getPosition());
 				glBindTexture(GL_TEXTURE_2D, planet.texture);
 				// Get specific radius for planet

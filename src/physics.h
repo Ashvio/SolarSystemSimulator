@@ -30,11 +30,11 @@ class Gravity {
 
 class Date {
     public:  
-    Date(unsigned int year, unsigned int month, unsigned int day) {
+    Date(unsigned int year, unsigned int month, double day) {
         setDate(year, month, day);
     }
 
-    void setDate(unsigned int year, unsigned int month, unsigned int day) {
+    void setDate(unsigned int year, unsigned int month, double day) {
         if (!checkValidDate(year, month, day)) {
             return;
         }
@@ -46,7 +46,7 @@ class Date {
     }
 
     void incrementDate() {
-        unsigned int new_date = day + 1;
+        double new_date = day + 10;
         unsigned int new_month = month;
         unsigned int new_year = year;
         if (new_date > getNumDaysMonth(month, year)) {
@@ -62,7 +62,7 @@ class Date {
 
 
     void decrementDate() {
-        unsigned int new_date = day - 1;
+        double new_date = day - 10;
         unsigned int new_month = month;
         unsigned int new_year = year;
         if (new_date < 1 ) {
@@ -113,8 +113,8 @@ class Date {
         }
     }
 
-    const int getTotalDays() {
-        int total = 0;
+    const double getTotalDays() {
+        double total = 0;
         for (unsigned int m = 0; m < month - 1; m++) {
             total += getNumDaysMonth(m + 1, year);
         }
@@ -131,7 +131,7 @@ class Date {
 private:
     unsigned int year;
     unsigned int month;
-    unsigned int day;
+    double day;
 
     static constexpr double julian_date_J2000 = 2451545.0;
     static constexpr double YEAR_DAYS =  365.2425;
@@ -164,9 +164,6 @@ struct OrbitalElements {
     double f = 0;
 
     double obliquity = 23.43928;
-    double e_radians() {
-        return 180.0/PI * e;
-    }
 
     // https://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf MATH!!!
     //Step 1
@@ -199,18 +196,18 @@ struct OrbitalElements {
         mean_anomaly = L - lp;
         double T = centuries_past_J2000;
         if (has_bcsf) {
-            mean_anomaly += b * pow(T, 2.0) + c * cos(f * T) + s * sin(f * T);
+           mean_anomaly += b * pow(T, 2.0) + c * cos(DEG_TO_RADS * f * T) + s * sin(DEG_TO_RADS * f * T);
         }
     }
-    //Step 3
+    //Step 3 Solve Kepler's Equation!!
     void computeEccentricAnomaly(double mean_anomaly, double& eccentric_anomaly, int iterations) {
         checkCurrent();        
         double M = fmod(mean_anomaly, 360.0) - 180.0;
-        double e_radian = e_radians();
-        double e_n = M + e_radian * sin(M);
+        double e_degree = (1.0/DEG_TO_RADS) * e;
+        double e_n = M + e_degree * sin(DEG_TO_RADS * M);
         for (int n = 0; n < iterations; n++) {
-            double delta_M = M - (e_n - e_radian * sin(e_n));
-            double delta_E = delta_M / (1.0 - e * cos(e_n));
+            double delta_M = M - (e_n - e_degree * sin(DEG_TO_RADS * e_n));
+            double delta_E = delta_M / (1.0 - e * cos(DEG_TO_RADS * e_n));
             e_n = e_n + delta_E;
         }
         eccentric_anomaly = e_n;
@@ -219,8 +216,8 @@ struct OrbitalElements {
     void computeHeliocentricCoordinates(double eccentric_anomaly, glm::dvec3& heliocentric_coords) {
         checkCurrent();
         double E = eccentric_anomaly;
-        double x = a * (cos(E) - e);
-        double y = a * sqrt(1 - pow(e, 2.0)) * sin(E);
+        double x = a * (cos(DEG_TO_RADS * E) - e);
+        double y = a * sqrt(1 - pow(e, 2.0)) * sin(DEG_TO_RADS * E);
         double z = 0.0;
         heliocentric_coords[0] = x;
         heliocentric_coords[1] = y;
@@ -233,16 +230,16 @@ struct OrbitalElements {
         double x = heliocentric_coords[0];
         double y = heliocentric_coords[1];
         double z = heliocentric_coords[2];
-        double sin_peri = sin(perihelion);
-        double sin_ln = sin(ln);
-        double cos_peri = cos(perihelion);
-        double cos_ln = cos(ln);
-        double cos_I = cos(I);
-        double sin_I = sin(I);
+        double sin_peri = sin(DEG_TO_RADS * perihelion);
+        double sin_ln = sin(DEG_TO_RADS * ln);
+        double cos_peri = cos(DEG_TO_RADS * perihelion);
+        double cos_ln = cos(DEG_TO_RADS * ln);
+        double cos_I = cos(DEG_TO_RADS * I);
+        double sin_I = sin(DEG_TO_RADS * I);
         ecliptic_coords[0] = (cos_peri * cos_ln - sin_peri * sin_ln * cos_I) * x 
                              + (-sin_peri*cos_ln - cos_peri * sin_ln * cos_I) * y;
-        ecliptic_coords[1] = (cos_peri * sin_ln - sin_peri * cos_ln * cos_I) * x
-                             + (-sin_peri * sin_ln - cos_peri * cos_ln * cos_I) * y;
+        ecliptic_coords[1] = (cos_peri * sin_ln + sin_peri * cos_ln * cos_I) * x
+                             + (-sin_peri * sin_ln + cos_peri * cos_ln * cos_I) * y;
         ecliptic_coords[2] = (sin_peri * sin_I) * x + (cos_peri * sin_I) * y;
         
     }
@@ -254,9 +251,10 @@ struct OrbitalElements {
         double y = ecliptic_coords[1];
         double z = ecliptic_coords[2];
 
-        double sin_o = sin(obliquity);
-        double cos_o = cos(obliquity);
+        double sin_o = sin(DEG_TO_RADS * obliquity);
+        double cos_o = cos(DEG_TO_RADS * obliquity);
         equatorial_coords[0] = x;
-        equatorial_coords[1] = cos(obliquity) * y - s;
+        equatorial_coords[1] = cos_o * y - sin_o * z;
+        equatorial_coords[2] = sin_o * y - cos_o * z;
     }
 };
