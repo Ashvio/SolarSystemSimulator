@@ -41,7 +41,6 @@ public:
 	void setPoseDirty() { pose_changed_ = true; }
 	const float* getLightPositionPtr() const { return &light_position_[0]; }
 	
-	
 	bool isTransparent() const { return transparent_; }
 	bool isPlaying() const { return animation_enabled; }
 	void togglePlaying() {
@@ -58,6 +57,8 @@ public:
 	double system_speed = 20.0;
 	bool forwards = true;
 	bool is_playing = true;
+	bool show_orbit = true;
+	float time_delta = 0.0f;
 private:
 	GLFWwindow* window_;
 

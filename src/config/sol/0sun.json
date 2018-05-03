@@ -4,6 +4,7 @@
     "diameter" : 1392000.0 ,
     "texture" : "../assets/sun.jpg",
     "hasBcsf" : false,
+    "orbitPeriod" : 0,
     "color" : {
         "r" : 0.502,
         "g" : 0.502,

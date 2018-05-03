@@ -17,12 +17,15 @@
 
 class PlanetaryObject {
 public:
-    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf, glm::vec3 color) 
-    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf), color(color) {
+    PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, 
+    OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf, glm::vec4 color, int orbitPeriod) 
+    : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), 
+    diff_elements(diff_elements), has_bcsf(hasBcsf), color(color), orbitPeriod(orbitPeriod) {
         loadTexture(texture_name);
         renderRadius =  diameter / 2.0f / SCALE_FACTOR;
         if (!is_sun) renderRadius *= 28.0;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
+        createOrbitVertices();
     }
 
     PlanetaryObject() {
@@ -38,6 +41,7 @@ public:
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
     void setPosition(glm::dvec4 pos) { position = pos; }
+    void createOrbitVertices();
 
     static Image* loadImage(const std::string& file_name) {
 		Image *im = new Image();
@@ -53,13 +57,16 @@ public:
     OrbitalElements start_elements;
     OrbitalElements diff_elements;
     bool has_bcsf = false;
-    glm::vec3 color;
+    glm::vec4 color;
+    std::vector<glm::vec4> orbit_vertices;
+    std::vector<uint> orbit_indices;
 private:
     std::string name;
     float diameter;
     float mass;
     bool is_sun;
     bool is_planet;
+    int orbitPeriod;
 
     glm::dvec4 position;
     glm::dvec4 velocity;
@@ -75,6 +82,7 @@ public:
     void generateSolPlanets();
     void generateSolPlanetPositions();
     void updateSolPlanetPositionsGravity();
+    glm::dvec4 getSolPlanetPosition(PlanetaryObject *planet, double centuries_past_J2000);
     PlanetaryObject loadPlanetFromConfig(std::string config_file);
     static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary_faces);
     int numPlanets() { return planets.size(); }

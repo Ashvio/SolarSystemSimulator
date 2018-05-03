@@ -19,3 +19,6 @@ Project Features:
     -press '0' key to reset planet size to default
     -press '-' key to decrease planet size by 1/10 until planet is 1/2 its original size
     -press '+' key to increase planet size by 1/10 until planet is 20x its original size
+
+  Show Orbit Trail
+    -press 'O' key to toggle between showing and not showing orbit trail

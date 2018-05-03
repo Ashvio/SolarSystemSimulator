@@ -4,6 +4,7 @@
     "diameter" : 4879.0,
     "texture" : "../assets/mercury.jpg",
     "hasBcsf" : false,
+    "orbitPeriod" : 88,
     "color" : {
         "r" : 0.502,
         "g" : 0.502,

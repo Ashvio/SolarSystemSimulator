@@ -4,6 +4,7 @@
     "diameter" : 6792.0,
     "texture" : "../assets/mars.jpg",
     "hasBcsf" : false,
+    "orbitPeriod" : 687,
     "color" : {
         "r" : 0.6,
         "g" : 0.396,

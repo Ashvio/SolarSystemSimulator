@@ -4,6 +4,7 @@
     "diameter" : 142984.0,
     "texture" : "../assets/jupiter.jpg",
     "hasBcsf" : true,
+    "orbitPeriod" : 4380,
     "color" : {
         "r" : 0.545,
         "g" : 0.271,

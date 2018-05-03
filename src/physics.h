@@ -60,6 +60,21 @@ class Date {
         setDate(new_year, new_month, new_date);
     }
 
+    void incrementDateBy(int num_days) {
+        double new_date = day + num_days;
+        unsigned int new_month = month;
+        unsigned int new_year = year;
+        if (new_date > getNumDaysMonth(month, year)) {
+            new_date = 1;
+            new_month = month + 1;
+            if (new_month > 12) {
+                new_month = 1;
+                new_year = year + 1;
+            }
+        }
+        setDate(new_year, new_month, new_date);
+    }
+
 
     void decrementDate(double dec) {
         double new_date = day - dec;

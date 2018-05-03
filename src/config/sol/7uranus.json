@@ -4,6 +4,7 @@
     "diameter" : 51118.0,
     "texture" : "../assets/uranus.jpg",
     "hasBcsf" : true,
+    "orbitPeriod" : 30660,
     "color" : {
         "r" : 0.686,
         "g" : 0.933,

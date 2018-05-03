@@ -151,6 +151,11 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		if (system_speed > 2 || system_speed < 0)
 		system_speed -= 2;
 	}
+	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+		// toggle between showing and not showing orbit
+		show_orbit = !show_orbit;
+	}
+
 	if (mods == 0 && captureWASDUPDOWN(key, action))
 		return ;
 
@@ -182,7 +187,7 @@ int count = 0;
 bool was_space = false;
 void GUI::updateViewingAngles() {
 	count++;
-	auto time_delta = toc(&timer);
+	time_delta = toc(&timer);
 	glm::vec3 next_eye = eye_;
 
 	// in free mode, increment eye with constant velocity while key is pressed

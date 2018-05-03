@@ -4,6 +4,7 @@
     "diameter" : 120536.0,
     "texture" : "../assets/saturn.jpg",
     "hasBcsf" : true,
+    "orbitPeriod" : 10585,
     "color" : {
         "r" : 1.0,
         "g" : 0.682,

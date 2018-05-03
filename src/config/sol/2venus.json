@@ -4,6 +4,7 @@
     "diameter" : 12104.0,
     "texture" : "../assets/venus.jpg",
     "hasBcsf" : false,
+    "orbitPeriod" : 225,
     "color" : {
         "r" : 0.718,
         "g" : 0.255,

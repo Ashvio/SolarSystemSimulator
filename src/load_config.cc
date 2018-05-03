@@ -17,10 +17,11 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     float mass = j.at("mass");
     std::string texture_name = j.at("texture");
     bool hasBcsf = j.at("hasBcsf");
+    int orbitPeriod = j.at("orbitPeriod");
     float r = j.at("color").at("r");
     float g = j.at("color").at("g");
     float b = j.at("color").at("b");
-    glm::vec3 color (r, g, b);
+    glm::vec4 color (r, g, b, 1.0f);
     bool is_sun = name == "Sun";
 
     
@@ -46,6 +47,6 @@ PlanetaryObject SolarSystem::loadPlanetFromConfig(std::string config_file) {
     diff_elements.lp = j.at("elements").at("diff").at("lp");
     diff_elements.ln = j.at("elements").at("diff").at("ln");
 
-    PlanetaryObject planet(name, diameter, mass, is_sun, !is_sun, start_elements, diff_elements, texture_name, hasBcsf, color);
+    PlanetaryObject planet(name, diameter, mass, is_sun, !is_sun, start_elements, diff_elements, texture_name, hasBcsf, color, orbitPeriod);
     return planet;
 }

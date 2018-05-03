@@ -4,6 +4,7 @@
     "diameter" : 12756.0,
     "texture" : "../assets/earth.jpg",
     "hasBcsf" : false,
+    "orbitPeriod" : 365,
     "color" : {
         "r" : 0.133,
         "g" : 0.545,
