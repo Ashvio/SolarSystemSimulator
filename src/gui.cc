@@ -12,6 +12,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <cstdio>
+#include "solar_system.h"
 
 namespace {
 	// FIXME: Implement a function that performs proper
@@ -19,9 +20,10 @@ namespace {
 	// TIPS: The implement is provided by the ray-tracer starter code.
 }
 
-GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height)
-	:window_(window), preview_height_(preview_height)
+GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height, SolarSystem* sol)
+	:window_(window), preview_height_(preview_height), sol(sol)
 {
+	if (window) {
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetKeyCallback(window_, KeyCallback);
 	glfwSetCursorPosCallback(window_, MousePosCallback);
@@ -29,6 +31,7 @@ GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height
 	glfwSetScrollCallback(window_, MouseScrollCallback);
 
 	glfwGetWindowSize(window_, &window_width_, &window_height_);
+	}
 	if (view_width < 0 || view_height < 0) {
 		view_width_ = window_width_;
 		view_height_ = window_height_;
@@ -74,21 +77,80 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			std::cout << "error saving image" << std::endl;
 		}
 	}
-	if (key == GLFW_KEY_MINUS && action == GLFW_PRESS) {
-		if (scalePlanetRadius >= 0.5) {
-			scalePlanetRadius -= 0.1;
+	if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
+		std::cout << "Toggling reverse mode\n";
+		forwards = !forwards;
+	}
+	if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
+		is_playing = !is_playing;
+	}
+	if (key == GLFW_KEY_MINUS && action != GLFW_RELEASE) {
+		if (scalePlanetRadius >= 5.0) {
+			scalePlanetRadius -= 2;
 		}
 	}
-	if (key == GLFW_KEY_EQUAL && action == GLFW_PRESS) {
-		if (scalePlanetRadius <= 20.0) {
-			scalePlanetRadius += 0.1;
+	if (key == GLFW_KEY_EQUAL && action != GLFW_RELEASE) {
+		if (scalePlanetRadius <= 40.0) {
+			scalePlanetRadius += 2.0;
 		}
 	}
 	if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
 		scalePlanetRadius = 1.0;
 	}
-	
-
+	if (key == GLFW_KEY_1 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[0].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_2 && action!= GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[1].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_3 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[2].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_4 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[3].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_5 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[4].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_6 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[5].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_7 && action!= GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[6].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_8 && action != GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->planets[7].getPosition();
+		eye_[2] += 170000.0;
+	}
+	if (key == GLFW_KEY_9 && action!= GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		eye_ = *sol->sun.getPosition();
+		eye_[2] += 1300000.0;
+	}
+	if (key == GLFW_KEY_PAGE_UP  && action != GLFW_RELEASE) {
+		if (system_speed < - 2 || system_speed > 0)
+		
+		system_speed += 2;
+	}
+	if (key == GLFW_KEY_PAGE_DOWN  && action != GLFW_RELEASE) {
+		if (system_speed > 2 || system_speed < 0)
+		system_speed -= 2;
+	}
 	if (mods == 0 && captureWASDUPDOWN(key, action))
 		return ;
 
@@ -125,7 +187,7 @@ void GUI::updateViewingAngles() {
 
 	// in free mode, increment eye with constant velocity while key is pressed
 	if (free_mode) {
-		float velocity = 100000.0f;
+		float velocity = 1000000.0f;
 		// KEY MOVEMENTS
 		if (active_keys["W"] == true) {
 			next_eye += velocity * (float)time_delta * look_;
@@ -153,7 +215,7 @@ void GUI::updateViewingAngles() {
 			deceleration_velocity = 0.0f;
 		}
 
-		auto velocity_delta = time_delta * 30000.0f;
+		auto velocity_delta = time_delta * 200000.0f;
 		// move x component
 		if (movement_velocity[0] != 0.0) {
 			next_eye += movement_velocity[0] * (float)time_delta * tangent_;
@@ -280,8 +342,6 @@ void GUI::updateViewingAngles() {
 		 }
 	}*/
 
-	if (count % 20 == 0)
-		std::cout << "FPS: " << 1 / time_delta << std::endl;
 /*
 	if (gravity_ && (!was_space || current_space <= 0) && newEyeHeight > eyeGroundHeight) {
 		auto velocity_delta = time_delta * -30.0f;

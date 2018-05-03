@@ -3,6 +3,9 @@ R"zzz(#version 430 core
 layout (triangles, equal_spacing, cw) in;
 in vec4 tcs_vs_light_direction[];
 in vec4 tcs_normal[];
+uniform mat4 projection;
+uniform mat4 model;
+uniform mat4 view;
 out vec4 vs_light_direction;
 out vec4 vs_normal;
 out vec2 vs_uv;

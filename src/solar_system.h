@@ -20,8 +20,8 @@ public:
     PlanetaryObject(std::string name, float diameter, float mass, bool is_sun, bool is_planet, OrbitalElements start_elements, OrbitalElements diff_elements, std::string texture_name, bool hasBcsf, glm::vec3 color) 
     : name(name), diameter(diameter), mass(mass), is_sun(is_sun), is_planet(is_planet), start_elements(start_elements), diff_elements(diff_elements), has_bcsf(hasBcsf), color(color) {
         loadTexture(texture_name);
-        renderRadius = 10* diameter / 2.0f / SCALE_FACTOR;
-        if (!is_sun) renderRadius *= 200.0;
+        renderRadius =  diameter / 2.0f / SCALE_FACTOR;
+        if (!is_sun) renderRadius *= 28.0;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
     }
 
@@ -78,8 +78,8 @@ public:
     PlanetaryObject loadPlanetFromConfig(std::string config_file);
     static void create_planetary_object(std::vector<glm::vec4>& planet_vertices, std::vector<glm::vec3>& planetary_faces);
     int numPlanets() { return planets.size(); }
-    void incrementDate() { current_date.incrementDate(); }
-    void decrementDate() { current_date.decrementDate(); }
+    void incrementDate(double inc) { current_date.incrementDate(inc); }
+    void decrementDate(double dec) { current_date.decrementDate(dec); }
     Date getDate() {return current_date;}
     std::vector<PlanetaryObject> planets;
     PlanetaryObject sun;

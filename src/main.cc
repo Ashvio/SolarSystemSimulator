@@ -108,7 +108,10 @@ GLFWwindow* init_glefw()
 int main(int argc, char* argv[])
 {
 	GLFWwindow *window = init_glefw();
-	GUI gui(window, main_view_width, main_view_height, preview_height);
+	SolarSystem sol = SolarSystem();
+	
+	GUI gui(window, main_view_width, main_view_height, preview_height, &sol);
+	GUI minimap_gui(nullptr, preview_width, preview_width, preview_height, &sol);
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
@@ -135,7 +138,6 @@ int main(int argc, char* argv[])
 	}
 
 	// Create solar system here
-	SolarSystem sol = SolarSystem();
 	sol.generateSolPlanets();
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
@@ -268,9 +270,11 @@ int main(int argc, char* argv[])
 		// mesh.loadAnimationFrom(argv[2]);
 	}
 	int m = 0;
+	TicTocTimer timer = tic();
 	
 	while (!glfwWindowShouldClose(window)) {
 
+		auto time_delta = toc(&timer);
 		
 
 		// Setup some basic window stuff.
@@ -320,11 +324,16 @@ int main(int argc, char* argv[])
 
 		// Render solar system
 		if (sol.numPlanets() > 0 && draw_planets) {
-			if (m % 5  == 0) {
-				std::cout << sol.getDate().getDate() << "\n";
-				sol.incrementDate();
+			if (gui.is_playing) {
+				if (m % 25 == 0)
+				std::cout << sol.getDate().getDate() << "\tFPS: " << 1 / time_delta << std::endl;
+				if (gui.forwards) {
+					sol.incrementDate(time_delta * gui.system_speed);
+				} else {
+					sol.decrementDate(time_delta * gui.system_speed);
+				}
 			    double centuries_past_J2000 = sol.getDate().getCenturiesPastJ2000();		
-				std::cout << "Time: " << centuries_past_J2000 << "\n";
+				// std::cout << "Time: " << centuries_past_J2000 << "\n";
 			}
 			m++;
 			
@@ -391,7 +400,104 @@ int main(int argc, char* argv[])
 
 			}
 		}
+		mats = minimap_gui.getMatrixPointers();
 		
+			// Render Minimap solar system
+			if (sol.numPlanets() > 0 && draw_planets) {
+				glViewport(main_view_width, main_view_height - 300, 300, 300);
+				// if (gui.is_playing) {
+				// 	if (m % 25 == 0)
+				// 	std::cout << sol.getDate().getDate() << "\tFPS: " << 1 / time_delta << std::endl;
+				// 	if (gui.forwards) {
+				// 		sol.incrementDate(time_delta * gui.system_speed);
+				// 	} else {
+				// 		sol.decrementDate(time_delta * gui.system_speed);
+				// 	}
+				//     double centuries_past_J2000 = sol.getDate().getCenturiesPastJ2000();		
+				// 	// std::cout << "Time: " << centuries_past_J2000 << "\n";
+				// }
+				//m++;
+				
+				// sol.generateSolPlanetPositions();
+				std::vector<glm::vec4> planet_vertices;
+				std::vector<glm::uvec3> planet_faces;
+				std::vector<glm::vec4> planet_normals;
+					
+				create_sphere(planet_vertices, planet_faces, planet_normals);
+				// Iterate through the planets and render each of them
+				for (int i = -1; i < sol.numPlanets(); i++) {
+					PlanetaryObject planet;
+					if (i == -1) {
+						planet = sol.sun;
+					} else {
+						planet = sol.planets[i];
+					}
+					glm::vec4 pos = glm::vec4(*planet.getPosition());
+					glBindTexture(GL_TEXTURE_2D, planet.texture);
+					// Get specific radius for planet
+					double r = planet.renderRadius * 1.0;
+					auto radius_data = [&planet]() -> const void * {
+						return &planet.renderRadius;
+					};
+					auto planet_position_data = [&pos]() -> const void * { 
+						return &pos;
+					};
+					auto default_color_data = [&planet]() -> const void * { 
+						return &planet.color;
+					};
+					auto scale_data = [&gui]() -> const void * {
+						return &gui.scalePlanetRadius;
+					};
+					auto text_binder = [](int loc, const void *data) {
+						//glUniform1iv(loc, 1, (const GLint*)data);
+						glUniform1i(loc, 0);
+					};
+					auto texture_data = [&planet]() -> const void * {
+						return &planet.texture;
+					};
+					// Uniforms
+					ShaderUniform radius = { "radius", float_binder, radius_data };
+					ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
+					ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
+					ShaderUniform planet_position = { "planet_position", vector_binder, planet_position_data };
+					ShaderUniform default_color = { "default_color", vector3_binder, default_color_data };
+					// Rendering planet
+					RenderDataInput planet_pass_input;
+					planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
+					planet_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
+					planet_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
+					RenderPass planet_pass(-1,
+											planet_pass_input,
+											{ sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
+											{ std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor, planet_position, default_color },
+											{ "fragment_color" });
+					
+					planet_pass.setup();
+	
+					glPatchParameteri(GL_PATCH_VERTICES, 3);
+	
+					CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
+													planet_faces.size() * 3,
+													GL_UNSIGNED_INT, 0));
+													
+				}
+				glViewport(0, 0, main_view_width, main_view_height);	
+				
+			}
+		if (draw_bar) {
+			glViewport(main_view_width, 0, bar_width, main_view_height);
+			
+			bar_pass.setup();
+
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+										rectangle_faces.size() * 3,
+										GL_UNSIGNED_INT, 0));
+
+			glViewport(0, 0, main_view_width, main_view_height);	
+		}
+		
+
+
 	
 		// Poll and swap.
 		glfwPollEvents();

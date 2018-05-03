@@ -14,10 +14,10 @@
 struct MatrixPointers {
 	const float *projection, *model, *view, *ortho;
 };
-
+class SolarSystem;
 class GUI {
 public:	
-	GUI(GLFWwindow*, int view_width = -1, int view_height = -1, int preview_height = -1);
+	GUI(GLFWwindow*, int view_width = -1, int view_height = -1, int preview_height = -1, SolarSystem* sol = nullptr) ;
 	//GUI(GLFWwindow*, int view_width = -1, int view_height = -1);
 	~GUI();
 
@@ -54,8 +54,10 @@ public:
 	bool is_recording = false;
 
 	float tess_level = 20.0f;
-	float scalePlanetRadius = 1.0;
-	
+	float scalePlanetRadius = 10.0;
+	double system_speed = 20.0;
+	bool forwards = true;
+	bool is_playing = true;
 private:
 	GLFWwindow* window_;
 
@@ -72,11 +74,13 @@ private:
 	int current_button_ = -1;
 	float roll_speed_ = M_PI / 64.0f;
 	float last_x_ = 0.0f, last_y_ = 0.0f, current_x_ = 0.0f, current_y_ = 0.0f;
-	float camera_distance_ = 1000000.0f;
+	float camera_distance_ = 10000000.0f;
 	float pan_speed_ = 0.08f;
 	float rotation_speed_ = 0.003f;
 	float zoom_speed_ = 0.10f;
 	float aspect_;
+
+	SolarSystem *sol;
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);
 	glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);

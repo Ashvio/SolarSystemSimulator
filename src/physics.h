@@ -45,8 +45,8 @@ class Date {
         }
     }
 
-    void incrementDate() {
-        double new_date = day + 10;
+    void incrementDate(double inc) {
+        double new_date = day + inc;
         unsigned int new_month = month;
         unsigned int new_year = year;
         if (new_date > getNumDaysMonth(month, year)) {
@@ -61,8 +61,8 @@ class Date {
     }
 
 
-    void decrementDate() {
-        double new_date = day - 10;
+    void decrementDate(double dec) {
+        double new_date = day - dec;
         unsigned int new_month = month;
         unsigned int new_year = year;
         if (new_date < 1 ) {
@@ -76,7 +76,7 @@ class Date {
         setDate(new_year, new_month, new_date);
     }
     const std::string getDate() {
-        std::string date = months[month - 1] + " " + std::to_string(day) + ", " + std::to_string(year);
+        std::string date = months[month - 1] + " " + std::to_string((int)day) + ", " + std::to_string(year);
         return date;
     }
     const bool checkValidDate(unsigned int year, unsigned int month, unsigned int day) {
@@ -123,9 +123,13 @@ class Date {
     }
     const double getCenturiesPastJ2000() {
         double num_years_since_J2000 = (double) ((int)year - 2000);
-
-        double num_days_since_J2000 = num_years_since_J2000 * YEAR_DAYS + getTotalDays();
-
+        double num_days_since_J2000;
+        if (num_years_since_J2000 >= 0) {
+            num_days_since_J2000 = num_years_since_J2000 * YEAR_DAYS + getTotalDays();
+        } else {
+            num_days_since_J2000 = num_years_since_J2000 * YEAR_DAYS + (YEAR_DAYS - getTotalDays());
+            
+        }
         return num_days_since_J2000 / (YEAR_DAYS*100);
     }
 private:
@@ -237,7 +241,7 @@ struct OrbitalElements {
         double cos_I = cos(DEG_TO_RADS * I);
         double sin_I = sin(DEG_TO_RADS * I);
         ecliptic_coords[0] = (cos_peri * cos_ln - sin_peri * sin_ln * cos_I) * x 
-                             + (-sin_peri*cos_ln - cos_peri * sin_ln * cos_I) * y;
+                             + (-sin_peri * cos_ln - cos_peri * sin_ln * cos_I) * y;
         ecliptic_coords[1] = (cos_peri * sin_ln + sin_peri * cos_ln * cos_I) * x
                              + (-sin_peri * sin_ln + cos_peri * cos_ln * cos_I) * y;
         ecliptic_coords[2] = (sin_peri * sin_I) * x + (cos_peri * sin_I) * y;
