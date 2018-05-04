@@ -26,10 +26,11 @@ RenderInputMeta::RenderInputMeta(int _position,
 	            const void *_data,
 	            size_t _nelements,
 	            size_t _element_length,
-	            int _element_type)
+	            int _element_type,
+				bool isInstanced)
 	:position(_position), name(_name), data(_data),
 	nelements(_nelements), element_length(_element_length),
-	element_type(_element_type)
+	element_type(_element_type), isInstanced(isInstanced)
 {
 }
 
@@ -91,6 +92,9 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 						meta.element_length,
 						meta.element_type,
 						GL_FALSE, 0, 0));
+		}
+		if (meta.isInstanced) {
+			glVertexAttribDivisor(meta.position, 1);
 		}
 		CHECK_GL_ERROR(glEnableVertexAttribArray(meta.position));
 		// ... because we need program to bind location
@@ -338,9 +342,10 @@ void RenderDataInput::assign(int position,
                              const void *data,
                              size_t nelements,
                              size_t element_length,
-                             int element_type)
+                             int element_type,
+							 bool isInstanced)
 {
-	meta_.emplace_back(position, name, data, nelements, element_length, element_type);
+	meta_.emplace_back(position, name, data, nelements, element_length, element_type, isInstanced);
 }
 
 void RenderDataInput::assignIndex(const void *data, size_t nelements, size_t element_length)

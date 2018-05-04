@@ -55,6 +55,7 @@ struct RenderInputMeta {
 	size_t nelements = 0;
 	size_t element_length = 0;
 	int element_type = 0;
+	bool isInstanced = false;
 
 	size_t getElementSize() const; // simple check: return 12 (3 * 4 bytes) for float3 
 	RenderInputMeta();
@@ -63,7 +64,8 @@ struct RenderInputMeta {
 	            const void *_data,
 	            size_t _nelements,
 	            size_t _element_length,
-	            int _element_type);
+	            int _element_type,
+				bool isInstanced = false);
 	bool isInteger() const;
 };
 
@@ -87,7 +89,8 @@ public:
 	            const void *data,
 	            size_t nelements,
 	            size_t element_length,
-	            int element_type);
+	            int element_type,
+				bool isInstanced = false);
 	/*
 	 * assign_index: assign the index buffer for vertices
 	 * This will bind the data to GL_ELEMENT_ARRAY_BUFFER

@@ -403,6 +403,49 @@ int main(int argc, char* argv[])
 					int num_alive = 0;
 					// indicate that this is a particle when rendering
 					int is_particle = 1;
+
+					if (particles.alive_particle_positions.size() > 0) {
+						// Use these shader uniforms since they're the same across particles
+						Particle p = particles.particles[0];
+						auto particle_radius_data = [&p]() -> const void * {
+							return &p.radius;
+						};
+						auto use_color_data = [&is_particle]() -> const void * {
+							return &is_particle;
+						};
+
+						ShaderUniform p_radius = {"radius", float_binder, particle_radius_data};
+						ShaderUniform use_color = {"use_color", int_binder, use_color_data};
+
+						// Rendering particles
+						RenderDataInput particle_pass_input;
+						int num_particles = particles.alive_particle_positions.size();
+						// Use same verticles and faces as planet since you're trying to render spheres
+						particle_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
+						particle_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
+						particle_pass_input.assign(1, "particle_position", particles.alive_particle_positions.data(), num_particles, 4, GL_FLOAT, true);
+						particle_pass_input.assign(2, "particle_color", particles.alive_particle_colors.data(), num_particles, 4, GL_FLOAT, true);
+						
+						glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+						RenderPass particle_pass(-1,
+												 particle_pass_input,
+												 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, nullptr, nullptr},
+												 {std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, p_radius, use_color, scaleFactor},
+												 {"fragment_color"});
+						particle_pass.setup();
+
+						CHECK_GL_ERROR(glDrawElementsInstanced(GL_TRIANGLES,
+													  		   planet_faces.size() * 3,
+													  		   GL_UNSIGNED_INT, 0, num_particles));
+					}
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+					/*
+					block_pass.setup();
+		
+		// glVertexAttribDivisor(2, 1);
+CHECK_GL_ERROR(glDrawElementsInstanced(GL_TRIANGLES, Block::cube_indices.size()*3, GL_UNSIGNED_INT, 0, num_blocks));
+
 					// loop through all the particles that are alive and render them
 					for (uint i = 0; i < particles.alive_particles.size(); i++) {
 						Particle p = particles.alive_particles[i];
@@ -436,23 +479,23 @@ int main(int argc, char* argv[])
 							particle_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
 							RenderPass particle_pass(-1,
 													 particle_pass_input,
-													 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, nullptr, nullptr/*sphere_tcs_shader, sphere_tes_shader*/},
+													 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, nullptr, nullptr},
 													 {std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, p_radius, p_position, p_color, use_color, scaleFactor},
 													 {"fragment_color"});
 
 							particle_pass.setup();
 
-							/*glPatchParameteri(GL_PATCH_VERTICES, 3);
 
-							CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
-														  planet_faces.size() * 3,
-														  GL_UNSIGNED_INT, 0));*/
 														  CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
 														  planet_faces.size() * 3,
 														  GL_UNSIGNED_INT, 0));
 
 						}
 					}
+
+					*/
+					
+					
 					//std::cout << "num alive " << num_alive << std::endl;
 				} else if (!gui.show_orbit) {
 					particles.kill_particles();
