@@ -35,6 +35,7 @@ void SolarSystem::generateSolPlanetPosition(PlanetaryObject& planet, double cent
     current_elements.computeHeliocentricCoordinates(eccentric_anomaly, heliocentric_coords);
     current_elements.computeEclipticCoordinates(heliocentric_coords, perihelion, ecliptic_coords);
     current_elements.computeEquatorialCoordinates(ecliptic_coords, equatorial_coords);
+    planet.setLastPosition();
     // equatorial_coords[1] = 0.0;
     planet.setPosition(glm::dvec4(equatorial_coords * (AU/SCALE_FACTOR), 1.0));
     // std::cout << planet.getName() << " " << glm::to_string(*planet.getPosition()) << std::endl;
@@ -90,24 +91,4 @@ void PlanetaryObject::loadTexture(const std::string& file_name) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     // Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->bytes.data());
-}
-
-void PlanetaryObject::createOrbitVertices() {
-    if (!is_planet) {
-        return;
-    }
-    // generate planet positions along orbit to calculate vertices
-/*
-    int iterate = 4;
-    SolarSystem sol = SolarSystem();
-    Date orbit_date = sol.getDate();
-    
-    for (int i = 0; i < orbitPeriod; i+= 10) {
-        orbit_date.incrementDate();
-        double centuries_past_J2000 = orbit_date.getCenturiesPastJ2000();
-        glm::vec4 planet_position = sol.getSolPlanetPosition(this, centuries_past_J2000);
-        orbit_vertices.push_back(planet_position);
-        orbit_indices.push_back(i);
-    }
-*/
 }

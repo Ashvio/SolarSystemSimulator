@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 		glfwGetFramebufferSize(window, &window_width, &window_height);
 		glViewport(0, 0, main_view_width, main_view_height);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
@@ -314,17 +314,7 @@ int main(int argc, char* argv[])
 
 		}		
 
-		if (draw_bar) {
-			glViewport(main_view_width, 0, bar_width, main_view_height);
-			
-			bar_pass.setup();
-
-			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
-										rectangle_faces.size() * 3,
-										GL_UNSIGNED_INT, 0));
-
-			glViewport(0, 0, main_view_width, main_view_height);	
-		}
+		
 
 		// Render solar system
 		if (sol.numPlanets() > 0 && draw_planets) {
@@ -355,8 +345,7 @@ int main(int argc, char* argv[])
 				} else {
 					planet = sol.planets[i];
 				}
-				// don't use color for planets
-				int is_particle = 0;
+				glm::vec4 last_pos = glm::vec4(*planet.getLastPosition());
 				glm::vec4 pos = glm::vec4(*planet.getPosition());
 				glBindTexture(GL_TEXTURE_2D, planet.texture);
 				// Get specific radius for planet
@@ -379,16 +368,14 @@ int main(int argc, char* argv[])
 				auto texture_data = [&planet]() -> const void * {
 					return &planet.texture;
 				};
-				auto use_color_data = [&is_particle]() -> const void * {
-					return &is_particle;
-				};
+				
 				// Uniforms
 				ShaderUniform radius = { "radius", float_binder, radius_data };
 				ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
 				ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
                 ShaderUniform planet_position = { "planet_position", vector_binder, planet_position_data };
 				ShaderUniform default_color = { "default_color", vector_binder, default_color_data };
-				ShaderUniform use_color = { "use_color", int_binder, use_color_data };
+				
 				// Rendering planet
 				RenderDataInput planet_pass_input;
 				planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
@@ -397,7 +384,7 @@ int main(int argc, char* argv[])
 				RenderPass planet_pass(-1,
 									   planet_pass_input,
 									   { sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
-									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor, planet_position, default_color, use_color },
+									   { std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, radius, texture, scaleFactor, planet_position, default_color },
 									   { "fragment_color" });
 				
 				planet_pass.setup();
@@ -407,61 +394,73 @@ int main(int argc, char* argv[])
 				CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
 											  planet_faces.size() * 3,
 											  GL_UNSIGNED_INT, 0));
-				/*
+				
 				// Render particles to show orbits
-				if (gui.show_orbit) {
+				if (gui.show_orbit && i != -1) {
+					//std::cout << "show particles" << std::endl;
 					float timePassed = gui.time_delta;
-					particles.update_particles(planet, timePassed);
+					particles.update_particles(last_pos, timePassed);
+					int num_alive = 0;
 					// indicate that this is a particle when rendering
-					is_particle = 1;
+					int is_particle = 1;
 					// loop through all the particles that are alive and render them
-					for (int i = 0; i < particles.getNumParticles(); i++) {
-						Particle p = particles.particles[i];
+					for (uint i = 0; i < particles.alive_particles.size(); i++) {
+						Particle p = particles.alive_particles[i];
 						// Render particle if it's alive
-						glm::vec4 particle_position = glm::vec4(p.position, 1.0);
 						if (p.life > 0.0f) {
+							num_alive++;
+							//std::cout << "particle is alive with position " << glm::to_string(p.position) << " and planet position " << glm::to_string(pos) << std::endl;
 							auto particle_radius_data = [&p]() -> const void * {
 								return &p.radius;
 							};
-							auto particle_position_data = [&particle_position]() -> const void * {
-								return &particle_position;
+							auto particle_position_data = [&p]() -> const void * {
+								return &p.position;
 							};
 							auto particle_color_data = [&p]() -> const void * {
 								return &p.color;
 							};
+							auto use_color_data = [&is_particle]() -> const void * {
+								return &is_particle;
+							};
 
 							ShaderUniform p_radius = { "radius", float_binder, particle_radius_data };
-							ShaderUniform p_position = {"planet_position", vector_binder, particle_position_data};
-							ShaderUniform p_color = {"default_color", vector_binder, particle_color_data};
+							ShaderUniform p_position = { "planet_position", vector_binder, particle_position_data };
+							ShaderUniform p_color = { "default_color", vector_binder, particle_color_data };
+							ShaderUniform use_color = { "use_color", int_binder, use_color_data };
 
 							// Rendering planet
 							RenderDataInput particle_pass_input;
 							// Use same verticles and faces as planet since you're trying to render spheres
 							particle_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
-							particle_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
+							//particle_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
 							particle_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
 							RenderPass particle_pass(-1,
 													 particle_pass_input,
-													 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, sphere_tcs_shader, sphere_tes_shader},
-													 {std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, p_radius, p_position, p_color, use_color},
+													 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, nullptr, nullptr/*sphere_tcs_shader, sphere_tes_shader*/},
+													 {std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, p_radius, p_position, p_color, use_color, scaleFactor},
 													 {"fragment_color"});
 
 							particle_pass.setup();
 
-							glPatchParameteri(GL_PATCH_VERTICES, 3);
+							/*glPatchParameteri(GL_PATCH_VERTICES, 3);
 
 							CHECK_GL_ERROR(glDrawElements(GL_PATCHES,
 														  planet_faces.size() * 3,
+														  GL_UNSIGNED_INT, 0));*/
+														  CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+														  planet_faces.size() * 3,
 														  GL_UNSIGNED_INT, 0));
+
 						}
 					}
-				} else {
+					//std::cout << "num alive " << num_alive << std::endl;
+				} else if (!gui.show_orbit) {
 					particles.kill_particles();
-				}*/
+				}
 
 			}
 		}
-		/*
+		
 		mats = minimap_gui.getMatrixPointers();
 		
 			// Render Minimap solar system
@@ -522,7 +521,7 @@ int main(int argc, char* argv[])
 					ShaderUniform scaleFactor = { "scaleFactor", float_binder, scale_data };
 					ShaderUniform texture = { "textureSampler", texture_binder, texture_data };
 					ShaderUniform planet_position = { "planet_position", vector_binder, planet_position_data };
-					ShaderUniform default_color = { "default_color", vector3_binder, default_color_data };
+					ShaderUniform default_color = { "default_color", vector_binder, default_color_data };
 					// Rendering planet
 					RenderDataInput planet_pass_input;
 					planet_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
@@ -547,11 +546,21 @@ int main(int argc, char* argv[])
 				
 			}
 
-*/
-	
-		// Poll and swap.
-		glfwPollEvents();
-		glfwSwapBuffers(window);
+			if (draw_bar) {
+				glViewport(main_view_width, 0, bar_width, main_view_height);
+
+				bar_pass.setup();
+
+				CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
+											  rectangle_faces.size() * 3,
+											  GL_UNSIGNED_INT, 0));
+
+				glViewport(0, 0, main_view_width, main_view_height);
+			}
+
+			// Poll and swap.
+			glfwPollEvents();
+			glfwSwapBuffers(window);
 
 	}
 	

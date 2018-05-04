@@ -196,7 +196,7 @@ void GUI::updateViewingAngles() {
 		// KEY MOVEMENTS
 		if (active_keys["W"] == true) {
 			next_eye += velocity * (float)time_delta * look_;
-			std::cout << "time delta " << time_delta << std::endl;
+			//std::cout << "time delta " << time_delta << std::endl;
 		}
 		if (active_keys["S"] == true) {
 			next_eye -= velocity * (float)time_delta * look_;

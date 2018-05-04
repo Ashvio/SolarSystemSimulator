@@ -25,7 +25,6 @@ public:
         renderRadius =  diameter / 2.0f / SCALE_FACTOR;
         if (!is_sun) renderRadius *= 28.0;
         position = glm::vec4(0.0, 0.0, 0.0, 1.0);
-        createOrbitVertices();
     }
 
     PlanetaryObject() {
@@ -37,11 +36,14 @@ public:
     const glm::dvec4* getPosition() {
         return &position;
     }
+    const glm::dvec4* getLastPosition() {
+        return &last_position;
+    }
     const float getMass() { return mass; }
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
     void setPosition(glm::dvec4 pos) { position = pos; }
-    void createOrbitVertices();
+    void setLastPosition() { last_position = position; }
 
     static Image* loadImage(const std::string& file_name) {
 		Image *im = new Image();
@@ -58,8 +60,6 @@ public:
     OrbitalElements diff_elements;
     bool has_bcsf = false;
     glm::vec4 color;
-    std::vector<glm::vec4> orbit_vertices;
-    std::vector<uint> orbit_indices;
 private:
     std::string name;
     float diameter;
@@ -71,6 +71,8 @@ private:
     glm::dvec4 position;
     glm::dvec4 velocity;
     glm::dvec4 accel;
+    glm::dvec4 last_position;
+    
 };
 
 class SolarSystem {
