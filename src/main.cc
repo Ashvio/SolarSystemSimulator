@@ -414,8 +414,8 @@ int main(int argc, char* argv[])
 							return &is_particle;
 						};
 
-						ShaderUniform p_radius = {"radius", float_binder, particle_radius_data};
-						ShaderUniform use_color = {"use_color", int_binder, use_color_data};
+						ShaderUniform p_radius = { "radius", float_binder, particle_radius_data };
+						ShaderUniform use_color = { "use_color", int_binder, use_color_data };
 
 						// Rendering particles
 						RenderDataInput particle_pass_input;
@@ -439,63 +439,6 @@ int main(int argc, char* argv[])
 													  		   GL_UNSIGNED_INT, 0, num_particles));
 					}
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-					/*
-					block_pass.setup();
-		
-		// glVertexAttribDivisor(2, 1);
-CHECK_GL_ERROR(glDrawElementsInstanced(GL_TRIANGLES, Block::cube_indices.size()*3, GL_UNSIGNED_INT, 0, num_blocks));
-
-					// loop through all the particles that are alive and render them
-					for (uint i = 0; i < particles.alive_particles.size(); i++) {
-						Particle p = particles.alive_particles[i];
-						// Render particle if it's alive
-						if (p.life > 0.0f) {
-							num_alive++;
-							//std::cout << "particle is alive with position " << glm::to_string(p.position) << " and planet position " << glm::to_string(pos) << std::endl;
-							auto particle_radius_data = [&p]() -> const void * {
-								return &p.radius;
-							};
-							auto particle_position_data = [&p]() -> const void * {
-								return &p.position;
-							};
-							auto particle_color_data = [&p]() -> const void * {
-								return &p.color;
-							};
-							auto use_color_data = [&is_particle]() -> const void * {
-								return &is_particle;
-							};
-
-							ShaderUniform p_radius = { "radius", float_binder, particle_radius_data };
-							ShaderUniform p_position = { "planet_position", vector_binder, particle_position_data };
-							ShaderUniform p_color = { "default_color", vector_binder, particle_color_data };
-							ShaderUniform use_color = { "use_color", int_binder, use_color_data };
-
-							// Rendering planet
-							RenderDataInput particle_pass_input;
-							// Use same verticles and faces as planet since you're trying to render spheres
-							particle_pass_input.assign(0, "vertex_position", planet_vertices.data(), planet_vertices.size(), 4, GL_FLOAT);
-							//particle_pass_input.assign(1, "normal", planet_normals.data(), planet_normals.size(), 4, GL_FLOAT);
-							particle_pass_input.assignIndex(planet_faces.data(), planet_faces.size(), 3);
-							RenderPass particle_pass(-1,
-													 particle_pass_input,
-													 {sphere_vertex_shader, sphere_geometry_shader, sphere_fragment_shader, nullptr, nullptr},
-													 {std_model, std_view, std_proj, std_light, tess_level_inner, tess_level_outer, p_radius, p_position, p_color, use_color, scaleFactor},
-													 {"fragment_color"});
-
-							particle_pass.setup();
-
-
-														  CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES,
-														  planet_faces.size() * 3,
-														  GL_UNSIGNED_INT, 0));
-
-						}
-					}
-
-					*/
-					
-					
 					//std::cout << "num alive " << num_alive << std::endl;
 				} else if (!gui.show_orbit) {
 					particles.kill_particles();
