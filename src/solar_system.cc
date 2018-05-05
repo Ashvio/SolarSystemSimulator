@@ -31,7 +31,7 @@ void SolarSystem::generateSolPlanetPosition(PlanetaryObject& planet, double cent
     
     //All our math..
     current_elements.computePerihelionAndMeanAnomaly(perihelion, mean_anomaly, planet.has_bcsf, centuries_past_J2000);
-    current_elements.computeEccentricAnomaly(mean_anomaly, eccentric_anomaly, 10000);
+    current_elements.computeEccentricAnomaly(mean_anomaly, eccentric_anomaly, 1000);
     current_elements.computeHeliocentricCoordinates(eccentric_anomaly, heliocentric_coords);
     current_elements.computeEclipticCoordinates(heliocentric_coords, perihelion, ecliptic_coords);
     current_elements.computeEquatorialCoordinates(ecliptic_coords, equatorial_coords);

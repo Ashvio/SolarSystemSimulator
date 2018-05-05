@@ -19,8 +19,8 @@ Project Features:
 
   Manipulate Planet Size
     -press '0' key to reset planet size to default
-    -press '-' key to decrease planet size by 1/10 until planet is 1/2 its original size
-    -press '+' key to increase planet size by 1/10 until planet is 20x its original size
+    -press '-' key to decrease planet size by 1/5 until planet is 1/2 its original size
+    -press '+' key to increase planet size by 1/5 until planet is 5x its original size
 
   Show Orbit Trail
     -press 'O' key to toggle between showing and not showing orbit trail
@@ -31,4 +31,9 @@ Project Features:
   Teleport to Planet View
     -Numbers 1-8 correspond to the 8 planets in order
     -Number 9 corresponds to a view of the inner solar system centered on the sun. Good to view Mercury-Mars if interested, and best view for the “realistic” mode (Number 0)
+    -The grave accent key '`' (the one to the left of 1) corresponds to a view of the entire solar system. The planets appear very small, so it is best to view after increasing the planet sizes.
     -Highly recommended to pause time to use this feature (otherwise the planet will move out of view quickly)
+
+The initial view currently just shows the planets through Saturn. You can see Uranus and Neptune by zooming out with the 'S'.
+
+Ashvin and I both completed the eCIS! (10 pts)

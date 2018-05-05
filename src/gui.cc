@@ -20,8 +20,8 @@ namespace {
 	// TIPS: The implement is provided by the ray-tracer starter code.
 }
 
-GUI::GUI(GLFWwindow* window, int view_width, int view_height, int preview_height, SolarSystem* sol)
-	:window_(window), preview_height_(preview_height), sol(sol)
+GUI::GUI(GLFWwindow* window, int view_width, int view_height,SolarSystem* sol)
+	:window_(window), sol(sol)
 {
 	if (window) {
 	glfwSetWindowUserPointer(window_, this);
@@ -90,7 +90,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		}
 	}
 	if (key == GLFW_KEY_EQUAL && action != GLFW_RELEASE) {
-		if (scalePlanetRadius <= 40.0) {
+		if (scalePlanetRadius <= 50.0) {
 			scalePlanetRadius += 2.0;
 		}
 	}
@@ -141,6 +141,11 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
 		eye_ = *sol->sun.getPosition();
 		eye_[2] += 1300000.0;
+	}
+	if (key == GLFW_KEY_GRAVE_ACCENT && action!= GLFW_RELEASE) {
+		look_ = glm::vec3(0.0f, 0.0f, -1.0f);
+		camera_distance_ = 30000000.0f;
+		eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);
 	}
 	if (key == GLFW_KEY_PAGE_UP  && action != GLFW_RELEASE) {
 		if (system_speed < - 2 || system_speed > 0)

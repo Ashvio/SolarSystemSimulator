@@ -27,9 +27,9 @@ int window_width = 1880;
 int window_height = 1000;
 int main_view_width = 1560;
 int main_view_height = 1000;
-int preview_width = window_width - main_view_width; // 320
-int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
-int bar_width = 3;
+//int preview_width = window_width - main_view_width; // 320
+//int preview_height = preview_width / 4 * 3; // 320 / 4 * 3 = 240
+//int bar_width = 3;
 
 const std::string window_title = "Solar System Simulator";
 
@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
 	GLFWwindow *window = init_glefw();
 	SolarSystem sol = SolarSystem();
 	
-	GUI gui(window, main_view_width, main_view_height, preview_height, &sol);
-	GUI minimap_gui(nullptr, preview_width, preview_width, preview_height, &sol);
+	GUI gui(window, main_view_width, main_view_height, &sol);
+	//GUI minimap_gui(nullptr, preview_width, preview_width, preview_height, &sol);
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
@@ -399,11 +399,6 @@ int main(int argc, char* argv[])
 				if (gui.show_orbit && i != -1) {
 					//std::cout << "show particles" << std::endl;
 					float timePassed = gui.time_delta;
-					// skip if the last position wasn't updated because there was too small of a difference
-					/*if (last_pos == pos) {
-						break;
-					}
-					particles.update_particles(last_pos, timePassed);*/
 					if (last_pos != pos) {
 						particles.update_particles(last_pos, timePassed, i);
 					}	
@@ -453,7 +448,7 @@ int main(int argc, char* argv[])
 
 			}
 		}
-		
+		/*
 		mats = minimap_gui.getMatrixPointers();
 		
 			// Render Minimap solar system
@@ -538,7 +533,8 @@ int main(int argc, char* argv[])
 				glViewport(0, 0, main_view_width, main_view_height);	
 				
 			}
-
+			*/
+			/*
 			if (draw_bar) {
 				glViewport(main_view_width, 0, bar_width, main_view_height);
 
@@ -549,7 +545,7 @@ int main(int argc, char* argv[])
 											  GL_UNSIGNED_INT, 0));
 
 				glViewport(0, 0, main_view_width, main_view_height);
-			}
+			}*/
 
 			// Poll and swap.
 			glfwPollEvents();
