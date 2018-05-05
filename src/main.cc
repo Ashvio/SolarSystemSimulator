@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
 	
 	bool draw_floor = false;
 	bool draw_bar = true;
-	bool draw_sky = false;
+	bool draw_sky = true;
 	bool draw_planets = true;
 
 	if (argc >= 3) {
