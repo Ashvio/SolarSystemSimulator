@@ -399,7 +399,14 @@ int main(int argc, char* argv[])
 				if (gui.show_orbit && i != -1) {
 					//std::cout << "show particles" << std::endl;
 					float timePassed = gui.time_delta;
-					particles.update_particles(last_pos, timePassed);
+					// skip if the last position wasn't updated because there was too small of a difference
+					/*if (last_pos == pos) {
+						break;
+					}
+					particles.update_particles(last_pos, timePassed);*/
+					if (last_pos != pos) {
+						particles.update_particles(last_pos, timePassed, i);
+					}	
 					int num_alive = 0;
 					// indicate that this is a particle when rendering
 					int is_particle = 1;

@@ -35,9 +35,10 @@ void SolarSystem::generateSolPlanetPosition(PlanetaryObject& planet, double cent
     current_elements.computeHeliocentricCoordinates(eccentric_anomaly, heliocentric_coords);
     current_elements.computeEclipticCoordinates(heliocentric_coords, perihelion, ecliptic_coords);
     current_elements.computeEquatorialCoordinates(ecliptic_coords, equatorial_coords);
-    planet.setLastPosition();
+    glm::dvec4 new_pos = glm::dvec4(equatorial_coords * (AU/SCALE_FACTOR), 1.0);
+    planet.setLastPosition(new_pos);
     // equatorial_coords[1] = 0.0;
-    planet.setPosition(glm::dvec4(equatorial_coords * (AU/SCALE_FACTOR), 1.0));
+    planet.setPosition(new_pos);
     // std::cout << planet.getName() << " " << glm::to_string(*planet.getPosition()) << std::endl;
     // std::cout << planet.getName() << " " << (glm::length(*planet.getPosition())) << std::endl;
     

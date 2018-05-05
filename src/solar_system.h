@@ -43,7 +43,13 @@ public:
     const bool isSun() { return is_sun; }
     const bool isPlanet() { return is_planet; }
     void setPosition(glm::dvec4 pos) { position = pos; }
-    void setLastPosition() { last_position = position; }
+    void setLastPosition(glm::dvec4 new_pos) {
+        glm::dvec4 difference = abs(new_pos - last_position);
+        //std::cout << "difference is " << glm::to_string(difference) << std::endl;
+        if (glm::length(difference) > 50000.0) {
+            last_position = position;
+        }
+    }
 
     static Image* loadImage(const std::string& file_name) {
 		Image *im = new Image();

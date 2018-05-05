@@ -1,7 +1,9 @@
 Team Members: Ashvin Govil and Mina Lee
 Project: Solar System Simulator
 
-How to compile and run our code:
+Build Instructions:
+This project builds like the other projects in this class. Create a build/ directory, run   
+cmake -DCMAKE_BUILD_TYPE=Release and then “make -j8” to compile. The program can be run using “./bin/solar” from here.
 
 Project Features:
 
@@ -22,3 +24,11 @@ Project Features:
 
   Show Orbit Trail
     -press 'O' key to toggle between showing and not showing orbit trail
+  Time controls
+    -Page up: Increase speed of time, Page down: Decrease speed of time
+    -P: Play/Pause time, R: Reverse direction of time (backwards)
+    -Current date is printed on terminal
+  Teleport to Planet View
+    -Numbers 1-8 correspond to the 8 planets in order
+    -Number 9 corresponds to a view of the inner solar system centered on the sun. Good to view Mercury-Mars if interested, and best view for the “realistic” mode (Number 0)
+    -Highly recommended to pause time to use this feature (otherwise the planet will move out of view quickly)
